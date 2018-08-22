@@ -1,0 +1,3 @@
+/py/vendor/**
+/web/node_modules/**
+/db/node_modules/**

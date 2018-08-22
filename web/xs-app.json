@@ -1,0 +1,11 @@
+{
+    "welcomeFile": "index.html",
+    "authenticationMethod": "route",
+    "routes": [
+        {
+            "source": "/py(.*)",
+            "target": "$1",
+            "destination": "py"
+        }
+    ]
+}

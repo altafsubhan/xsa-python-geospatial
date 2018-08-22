@@ -1,0 +1,31 @@
+{
+    "format_version": 1,
+    "imports": [
+        {
+            "target_table": "STRAVELAG",
+            "source_data": {
+                "data_type": "CSV",
+                "file_name": "travelagent.csv",
+                "has_header": true
+            },
+            "import_settings": {
+                "import_columns": [
+                    "MANDT",
+                    "AGENCYNUM",
+                    "NAME",
+                    "STREET",
+                    "POSTBOX",
+                    "POSTCODE",
+                    "CITY",
+                    "COUNTRY",
+                    "REGION",
+                    "TELEPHONE",
+                    "URL",
+                    "LANGU",
+                    "CURRENCY",
+                    "LOC_4326"
+                ]
+            }
+        }
+    ]
+}
