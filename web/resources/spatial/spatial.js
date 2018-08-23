@@ -3,42 +3,43 @@ require([
     "esri/views/MapView",
     "dojo/domReady!",
     "esri/views/2d/draw/Draw",
-	"esri/Graphic",
+  	"esri/Graphic",
     "esri/geometry/Polygon",
-    "esri/geometry/geometryEngine",
     "esri/geometry/Point",
-    //"esri/symbols/SimpleMarkerSymbol",
+    //"esri/symbols/SimpleMarkerSymbol",    //for plotting points...
     //"esri/Color", 
     //"esri/InfoTemplate", 
-   // "esri/graphic"
-  ], function(
+    // "esri/graphic"
+], function(
     Map, 
     MapView, 
-    domready,// Graphic,
-	Draw,
-	Graphic,
-      Polygon,
-      geometryEngine,
-//	  webMercatorUtils,
-    Point,
+    domready,
+	  Draw,
+	  Graphic,
+    Polygon,
+    //Point,    //for plotting pts...
     //SimpleMarkerSymbol,
     //Color,
     //InfoTemplate
-	){
+){
+    //create map obj with srid 4326
     var map = new Map({
-      basemap: "hybrid",
-      spatialReference: 4326
-    });
-    var view = new MapView({
-      container: "viewDiv",  // Reference to the scene div created in step 5
-      map: map,  // Reference to the map object created before the scene
-      zoom: 12,  // Sets zoom level based on level of detail (LOD)
-      center: [12.4687279, 41.8672173]  // Sets center point of view using longitude,latitude
+        basemap: "osm",
+        spatialReference: 4326
     });
 
-    //var point = new Point(12.4687279, 41.8672173, map.spatialReference)
+    //create MapView 
+    var view = new MapView({
+        container: "viewDiv",  
+        map: map,  
+        zoom: 20,  
+        center: [12.4687279, 41.8672173]  
+    });
+
+    // for pts...
+    /*var point = new Point(12.4687279, 41.8672173, map.spatialReference)
     
-    /*var pointAtt = {
+    var pointAtt = {
       "Xcoord": 12.4687279,
       "Ycoord": 41.8672173,
       "Plant":"Mesa Mint"};
@@ -53,73 +54,73 @@ require([
 
     view.graphics.add(graphic) */
 
-	 view.ui.add("draw-polygon", "top-left");
-      view.when(function(event) {
-	  console.log(view)
+    //draw polygon button for user polygon input
+	  view.ui.add("draw-polygon", "top-left");
+    view.when(function(event) {
         var draw = new Draw({
-          view: view
+            view: view
         });
-		console.log(4654654)
 
+        //create polygon when map area clicked
         var drawPolygonButton = document.getElementById("draw-polygon");
-		console.log(drawPolygonButton)
         drawPolygonButton.addEventListener("click", function() {
-          view.graphics.removeAll();
-          enableCreatePolygon(draw, view);
+            view.graphics.removeAll();
+            enableCreatePolygon(draw, view);
         });
-      });
+    });
 
-      function enableCreatePolygon(draw, view) {
+    //for creating polygon with user input
+    function enableCreatePolygon(draw, view) {
         var action = draw.create("polygon");
         view.focus();
         action.on("vertex-add", drawPolygon);
         action.on("vertex-remove", drawPolygon);
-	    action.on("cursor-update", drawPolygon);
+	      action.on("cursor-update", drawPolygon);
         action.on("draw-complete", drawPolygon);
-      }
+    }
 
-      function drawPolygon(event) {
+    //draw polygon to show on map
+    function drawPolygon(event) {
         var vertices = event.vertices;
-		 if (event.type == "draw-complete"){
-				// subi here are the stuff you need :)
+        
+        //after user is done drawing...
+		    if (event.type === "draw-complete"){
+            console.log(vertices)
+            console.log(view.spatialReference)
 
-		console.log(vertices)
-}
-		view.graphics.removeAll();
+            //send to Python
+            
+        }
 
+		    view.graphics.removeAll();
         var polygon = createPolygon(vertices);
-
         var graphic = createGraphic(polygon);
-        view.graphics.add(graphic);
-	/*	if (event.type == "draw-complete"){
-			console.log(polygon)
-			for (var i = 0; i < vertices.length; i++) {
-				var pt = new Point(i, view.spatialReference);
-				console.log((pt.latitude) + " " + (pt.longtitude))
-			}
-		}
-      */
-}
-      function createPolygon(vertices) {
-        return new Polygon({
-          rings: vertices,
-          spatialReference: view.spatialReference
-        });
-      }
 
-function createGraphic(polygon) {
+        view.graphics.add(graphic);
+    }
+    
+    //create polygon with given vertices
+    function createPolygon(vertices) {
+        return new Polygon({
+            rings: vertices,
+            spatialReference: view.spatialReference
+        });
+    }
+
+    //show polygon on map
+    function createGraphic(polygon) {
         graphic = new Graphic({
-          geometry: polygon,
-          symbol: {
-            type: "simple-fill", // autocasts as SimpleFillSymbol
-            color: [178, 102, 234, 0.8],
-            style: "solid",
-            outline: { // autocasts as SimpleLineSymbol
-              color: [255, 255, 255],
-              width: 2
+            geometry: polygon,
+            symbol: {
+                type: "simple-fill", 
+                color: [178, 102, 234, 0.8],
+                style: "solid",
+                outline: { 
+                    color: [0, 0, 0],
+                    width: 2
+                }
             }
-          }
         });
         return graphic;
-      }
-  });
+    }
+});
