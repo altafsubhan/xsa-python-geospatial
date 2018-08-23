@@ -6,7 +6,8 @@ require([
   	"esri/Graphic",
     "esri/geometry/Polygon",
     "esri/geometry/Point",
-    //"esri/symbols/SimpleMarkerSymbol",    //for plotting points...
+	"esri/symbols/PictureMarkerSymbol",
+    //"esri/symbols/SimpleMarkerSymbol",
     //"esri/Color", 
     //"esri/InfoTemplate", 
     // "esri/graphic"
@@ -17,7 +18,10 @@ require([
 	  Draw,
 	  Graphic,
     Polygon,
-    //Point,    //for plotting pts...
+      //geometryEngine,
+//	  webMercatorUtils,
+    Point,
+	PictureMarkerSymbol,
     //SimpleMarkerSymbol,
     //Color,
     //InfoTemplate
@@ -67,7 +71,18 @@ require([
             view.graphics.removeAll();
             enableCreatePolygon(draw, view);
         });
-    });
+
+		var points = [["google HQ", "1600 Amphitheatre Parkway, Mountain View, CA 94043, USA", 37.4224764, -122.0842499], ["School", "200 University Ave W, Waterloo, ON N2L 3G1, Canada", 43.4695172, -80.54124659999999]]
+
+		var pictureMarkerSymbol = new PictureMarkerSymbol('/image-from-google-maps.png', 10000,10000);
+		var pointexample = new PictureMarkerSymbol('http://static.arcgis.com/images/Symbols/Basic/RedStickpin.png', 20, 20);
+
+		for (var i = 0; i < points.length; i++) {
+			var pt = new Point(points[i][3],points[i][2]);
+			view.graphics.add(new Graphic(pt, pointexample));
+		}
+
+      });
 
     //for creating polygon with user input
     function enableCreatePolygon(draw, view) {
@@ -75,7 +90,7 @@ require([
         view.focus();
         action.on("vertex-add", drawPolygon);
         action.on("vertex-remove", drawPolygon);
-	      action.on("cursor-update", drawPolygon);
+	    action.on("cursor-update", drawPolygon);
         action.on("draw-complete", drawPolygon);
     }
 
@@ -92,7 +107,7 @@ require([
             
         }
 
-		    view.graphics.removeAll();
+	    view.graphics.removeAll();
         var polygon = createPolygon(vertices);
         var graphic = createGraphic(polygon);
 
@@ -101,6 +116,20 @@ require([
     
     //create polygon with given vertices
     function createPolygon(vertices) {
+		if (event.type == "draw-complete"){
+				// subi here are the stuff you need :)
+				console.log(vertices)
+		}
+	/*	if (event.type == "draw-complete"){
+			console.log(polygon)
+			for (var i = 0; i < vertices.length; i++) {
+				var pt = new Point(i, view.spatialReference);
+				console.log((pt.latitude) + " " + (pt.longtitude))
+			}
+		}
+      */
+	}
+      function createPolygon(vertices) {
         return new Polygon({
             rings: vertices,
             spatialReference: view.spatialReference
