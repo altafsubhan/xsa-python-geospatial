@@ -144,7 +144,5 @@ def getPoints():
 
     for result in results:
 
-
-
 if __name__ == '__main__':
     app.run(port=app_port)

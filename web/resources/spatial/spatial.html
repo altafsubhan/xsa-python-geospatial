@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="https://js.arcgis.com/4.8/esri/css/main.css">
     <link rel="stylesheet" href="spatial.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
     <script src="https://js.arcgis.com/4.8/"></script>
     <script type="text/javascript" src="spatial.js"></script>
 </head>
@@ -15,5 +16,11 @@
 		<div id="draw-polygon" class="esri-widget--button esri-widget esri-interactive" title="Draw and measure polygon">
       		<span class="esri-icon-polygon"></span>
     	</div>
-	</div>
+    </div>
+    <div id="panel">
+        <form id="searchArea"> 
+            <input id="searchField" name="searchInput" type="text" placeholder='Travel Agency'>
+            <input id="searchSubmit" type="submit" value="Search">
+        </form>
+    </div>
 </body>
