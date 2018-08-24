@@ -7,9 +7,12 @@ from hdbcli import dbapi
 from cf_logging import flask_logging
 from sap import xssec
 from flask import *
+from flask_socketio import SocketIO
+from flask_socketio import send, emit, Namespace
 
 #create instance of flask app
 app = Flask(__name__)
+socketio = SocketIO(app)
 app_port = int(os.environ.get('PORT', 3000))
 
 #connection with services
@@ -100,7 +103,7 @@ def showMap():
         map_osm.save('./map.html')
         return send_file('./map.html')
 
-#### Using ArcGIS ####
+''' Using ArcGIS '''
 @app.route('/geocode', methods=['GET'])
 def startGIS():
     #authorize user
@@ -143,6 +146,9 @@ def getPoints():
     results = executeQuery(conn, query)
 
     for result in results:
+
+''' WEBSCOKET IMPLEMENTATION '''
+
 
 if __name__ == '__main__':
     app.run(port=app_port)

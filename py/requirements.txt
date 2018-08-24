@@ -4,3 +4,5 @@ hdbcli
 sap_xssec==1.1.5
 sap_cf_logging==3.0.0
 folium
+Flask_SocketIO
+eventlet
