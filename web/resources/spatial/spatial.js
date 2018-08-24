@@ -7,7 +7,8 @@ require([
     "esri/geometry/Polygon",
     "esri/geometry/support/webMercatorUtils",
     "esri/geometry/Point",
-    "esri/symbols/PictureMarkerSymbol"
+	"esri/symbols/PictureMarkerSymbol",
+	"esri/widgets/Popup",
 ], function(
     Map, 
     MapView, 
@@ -17,7 +18,8 @@ require([
     Polygon,
     webMercatorUtils,
     Point,
-    PictureMarkerSymbol
+	PictureMarkerSymbol,
+	Popup,
 ){
     //create map obj with srid 4326
     var map = new Map({
@@ -34,13 +36,15 @@ require([
         padding: {left: 320}    //for side panel
     });
 
-    //add polygon button to get user input
+    //draw polygon button for user polygon input
 	view.ui.add("draw-polygon", "top-left");
+	pointGraphics = []
     view.when(function(event) {
         var graphic;
         var draw = new Draw({
             view: view
         });
+
 
         //create polygon when map area clicked
         var drawPolygonButton = document.getElementById("draw-polygon");
@@ -48,6 +52,7 @@ require([
             view.graphics.remove(graphic);
             enableCreatePolygon(draw, view);
         });
+
         //event handlers for creating polygon
         function enableCreatePolygon(draw, view) {
             var action = draw.create("polygon");
@@ -71,9 +76,7 @@ require([
                     ));
                 }
                 console.log(polygonCoord);
-
                 //send to Python
-                
             }
 
             view.graphics.remove(graphic);
@@ -81,34 +84,60 @@ require([
             graphic = createGraphic(polygon);
 
             view.graphics.add(graphic);
+    	}
+	});
 
-            //create polygon with given vertices
-            function createPolygon(vertices) {
-                return new Polygon({
-                    rings: vertices,
-                    spatialReference: view.spatialReference
-                });
-            }
+		
+		view.on("click", function(event){
+			event.stopPropagation();
+			view.hitTest(event).then(function( response ){
+				if (response.results.length == 1) { // might cause problems later... we'll see
+					var g = response.results[0].graphic;
+					for (var i = 0; i < pointGraphics.length; i++){ //make sure we hit a point
+						if (g == pointGraphics[i]){
+							target = {
+								target: pointGraphics[i],
+								scale: 30
+							}
+							view.goTo(target).then( () => {
+								view.popup.open({
+									title:"whatever", 
+									location: view.center, 
+									content: "SUBI"
+								});
+							});
+							break;
+						}
+					}
+				}
+			});
+		});
 
-            //show polygon on map
-            function createGraphic(polygon) {
-                graphic = new Graphic({
-                    geometry: polygon,
-                    symbol: {
-                        type: "simple-fill", 
-                        color: [178, 102, 234, 0.8],
-                        style: "solid",
-                        outline: { 
-                            color: [0, 0, 0],
-                            width: 2
-                        }
-                    }
-                });
-                return graphic;
-            }
-        }
-    }
-);
+		//create polygon with given vertices
+		function createPolygon(vertices) {
+			return new Polygon({
+				rings: vertices,
+				spatialReference: view.spatialReference
+			});
+		}
+
+		//show polygon on map
+		function createGraphic(polygon) {
+			graphic = new Graphic({
+				geometry: polygon,
+				symbol: {
+					type: "simple-fill", 
+					color: [178, 102, 234, 0.8],
+					style: "solid",
+					outline: { 
+						color: [0, 0, 0],
+						width: 2
+					}
+				}
+			});
+			return graphic;
+    	}
+
 
     //var points = [["google HQ", "1600 Amphitheatre Parkway, Mountain View, CA 94043, USA", 37.4224764, -122.0842499], ["School", "200 University Ave W, Waterloo, ON N2L 3G1, Canada", 43.4695172, -80.54124659999999]];
     points = [
@@ -145,7 +174,9 @@ require([
         var ptSymbol = new PictureMarkerSymbol('http://static.arcgis.com/images/Symbols/Basic/RedStickpin.png', 20, 20);
         for (var i = 0; i < points.length; i++) {
             var pt = new Point(points[i][0], points[i][1], 4326);   //Point(points[i][3],points[i][2], 4326);
-            view.graphics.add(new Graphic(pt, ptSymbol));
-        }
+			var graphic = new Graphic(pt, ptSymbol);
+			pointGraphics.push(graphic);
+			view.graphics.add(graphic);
+		}
     }
 });
