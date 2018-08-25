@@ -139,16 +139,42 @@ def startGIS():
 
     return str(results)
 
-@app.route('/getPoints', methods=['GET'])
-def getPoints():
-    conn = connectDB('spatial-db')
-    query = 'SELECT "NAME", "LOC_4326" FROM STRAVELAG'
-    results = executeQuery(conn, query)
-
-    for result in results:
-
 ''' WEBSCOKET IMPLEMENTATION '''
+class SpeechWsNamespace(Namespace):
+    def on_connect(self):
+        logger.info('Connected to client!')
+        send('Connected to server!')
+    
+    def on_message(self, msg):
+        logger.info('Received from client: %s' % msg)
+    
+    def on_error(self, e):
+        logger.info('Error in websocket connection: %s' % e)
+        self.close()
+
+    def on_getPts(self, type):
+        logger.info('received request')
+        if (type == "travelAgents"):
+            conn = connectDB('spatial-db')
+            query = '''
+                SELECT 
+                NAME, STREET, CITY, COUNTRY,
+                LOC_4326.ST_X() AS LONGITUDE,
+                LOC_4326.ST_Y() AS LATITUDE
+                FROM STRAVELAG
+            '''
+
+            response = []
+            for result in executeQuery(conn, query):
+                response.append(list(result))
+            logger.info('sending: ' + str(response))
+            return(response)
+        else:
+            return("error")
 
 
+socketio.on_namespace(SpeechWsNamespace('/geospatial'))
+
+''' START APP '''
 if __name__ == '__main__':
-    app.run(port=app_port)
+    socketio.run(app, port=app_port)

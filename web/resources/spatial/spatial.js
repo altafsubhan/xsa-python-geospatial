@@ -36,7 +36,7 @@ require([
 		} //for side panel
 	});
 
-	/*websockets
+	//websockets
 	var websocketPromise = new Promise((resolve, reject) => {
 		var socket = io.connect('wss://py.hanapm.local.com:30033/geospatial');
 		socket.on('open', resolve(socket));
@@ -45,10 +45,10 @@ require([
 
 	websocketPromise.then((socket) => {
 		globalSocket = socket;
-		socket.on('message', (e) => {
+		socket.on('message', e => {
 			console.log('Received from server: ' + e);
 		});
-		socket.on('error', (e) => {
+		socket.on('error', e => {
 			console.log('Error from websocket: ' + e);
 			closeWebsocket();
 		});
@@ -56,11 +56,11 @@ require([
 		function closeWebsocket() {
 			if (socket && socket.readyState === socket.OPEN) socket.close();
 		}
-	});*/
+	});
 
 	//draw polygon button for user polygon input
 	view.ui.add("draw-polygon", "top-left");
-	pointGraphics = []
+	var pointGraphics = []
 	view.when(function (event) {
 		var graphic;
 		var draw = new Draw({
@@ -142,6 +142,7 @@ require([
 	});
 	searchSubmitBtn.addEventListener("click", () => {
 		searchInput = searchField.value;
+		if (view.graphics.length < 1) showTravelAgents();
 		zoomIn(searchInput);		//zoom in on respective point
 	}); 
 
@@ -158,14 +159,20 @@ require([
 
 	//actual zoom in function
 	function zoomIn(input) {
+		if (typeof(input) === 'string') {
+			
+		}
 		for (var i = 0; i < pointGraphics.length; i++) {
 			if (
-				(typeof(input) === 'string' && pointGraphics[i].attributes.Name === input)
-				|| (typeof(input) === 'object' && input === pointGraphics[i])
+				(typeof(input) === 'string' && 
+					findNameMatch(input)) ||
+					//pointGraphics[i].attributes.Name === input) || 
+				(typeof(input) === 'object' && 
+					input === pointGraphics[i])
 			) {
 				target = {
 					target: pointGraphics[i],
-					scale: 30
+					zoom: 30
 				}
 				options = {
 					animate: true,
@@ -187,10 +194,23 @@ require([
 				break;
 			}
 		}
+		function findNameMatch(name) {
+			globalSocket.emit('travelAgencyNameSearch', name, )
+		}
+	}
+ 
+	//for plotting points
+	var showTravelAgentsBtn = document.getElementById('showTravelAgentsBtn');
+	showTravelAgentsBtn.addEventListener("click", showTravelAgents);
+	function showTravelAgents() {
+		console.log('sending request')
+		globalSocket.emit('getPts', "travelAgents", pts => {
+			console.log('received back: ' + pts)
+			if (pts !== "error") plotPoints(pts);
+		});
 	}
 
-	//for plotting points
-	points = [
+	/*points = [
 		["Ali's Bazar", '45, Mac Arthur Boulevard', 'Boston', 'US', -71.0599532, 42.35728160000001],
 		["Up 'n' Away", 'Nackenbergerstr. 92', 'Hannover', 'DE', 9.807146399999999, 52.3770461],
 		['Super Agency', '50 Cranworth St', 'Glasgow', 'GB', -4.291501999999999, 55.8754958],
@@ -242,10 +262,10 @@ require([
 		['Hot Socks Travel', '450 George St', 'Sydney', 'AU', 151.2076836, -33.8702541],
 		['Aussie Travel', '150 Queens Rd', 'Manchester', 'GB', -2.2155178, 53.4999536]
 	];
-	plotPoints(points);
+	plotPoints(points);*/
 
 	function plotPoints(points) {
-		var ptSymbol = new PictureMarkerSymbol('http://static.arcgis.com/images/Symbols/Basic/RedStickpin.png', 20, 20);
+		var ptSymbol = new PictureMarkerSymbol('images/marker.png', 20, 20);
 		for (var i = 0; i < points.length; i++) {
 			var pt = new Point(points[i][4], points[i][5], 4326); //Point(points[i][3],points[i][2], 4326);
 			var attr = {
