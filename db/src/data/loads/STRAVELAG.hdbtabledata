@@ -5,8 +5,11 @@
             "target_table": "STRAVELAG",
             "source_data": {
                 "data_type": "CSV",
-                "file_name": "travelagent.csv",
-                "has_header": true
+                "file_name": "travel_agents.csv",
+                "has_header": true,
+                "type_config" : { 
+                    "delimiter" : ";" 
+                } 
             },
             "import_settings": {
                 "import_columns": [
