@@ -66,7 +66,7 @@ require([
 
 	//draw polygon button for user polygon input
 	view.ui.add("draw-polygon", "top-left");
-	var pointGraphics = [], clusterGraphics = [];
+	var pointGraphics = [];
 	view.when(function (event) {
 		var graphic;
 		var draw = new Draw({
@@ -204,12 +204,27 @@ require([
 		}
 	}
  
+	var clusterLayer;		//needed for clearing screen when plotting points
+
 	//for plotting travel agencies
 	var showTravelAgentsBtn = document.getElementById('showTravelAgentsBtn');
 	showTravelAgentsBtn.addEventListener("click", showTravelAgents);
 	function showTravelAgents() {
 		globalSocket.emit('getPts', "travelAgents", pts => {
-			if (pts !== "error") plotPoints(pts);
+			if (pts !== "error") {
+				var ptSymbol = {
+					type: "picture-marker",
+					url: "images/marker.png",
+					width: 20,
+					height: 20
+				}
+				agencyPoints = makePointsList(pts, ptSymbol)
+				var agencyPtsLayer = new GraphicsLayer({
+					graphics: agencyPoints
+				});
+				map.remove(clusterLayer);
+				map.add(agencyPtsLayer);
+			}
 		});
 	}
 
@@ -222,15 +237,44 @@ require([
 			number: view.zoom + 5
 		}
 		globalSocket.emit('getClusters', options, pts => {
-			if (pts !== "error") plotPoints(pts, true);
+			if (pts !== "error") {
+				clusterPoints = makePointsList(pts, null, true)
+				clusterLayer = new GraphicsLayer({
+					graphics: clusterPoints
+				});
+				map.removeAll();
+				map.add(clusterLayer);
+			}
 		})
 	}
 
-	//show points on the map
-	function plotPoints(points, cluster=false) {
-		map.removeAll();
+	//for plotting major airports
+	var showAirportsBtn = document.getElementById('showAirportsBtn');
+	showAirportsBtn.addEventListener("click", showAirports);
+	function showAirports() {
+		globalSocket.emit('getPts', 'airports', pts => {
+			if (pts !== "error") {
+				var ptSymbol = {
+					type: "picture-marker",
+					url: "images/airport_marker.png",
+					width: 20,
+					height: 20
+				}
+				airportPoints = makePointsList(pts, ptSymbol)
+				var airportPtsLayer = new GraphicsLayer({
+					graphics: airportPoints
+				});
+				map.remove(clusterLayer);
+				map.add(airportPtsLayer);
+			}
+		});
+	}
+
+	//prepare list of points to show on map
+	function makePointsList(points, symbol, cluster=false) {
+		var pointGraphics = []
+		
 		if (cluster) {
-			var picBaseUrl = "https://static.arcgis.com/images/Symbols/Shapes/";
 			for (var i = 0; i < points.length; i++) {
 				var count = points[i].Count;
 				var source = count > 5 ? "images/cluster_marker_red.png" : "images/cluster_marker_yellow.png";
@@ -250,35 +294,22 @@ require([
 				var attr = {
 					ClusterID: points[i].ClusterID
 				}
-				var textGraphic = new Graphic(pt, textSymbol);
+				var textGraphic = new Graphic(pt, textSymbol, attr);
 				var picGraphic = new Graphic(pt, ptSymbol, attr);
-				clusterGraphics.push(picGraphic);
-				clusterGraphics.push(textGraphic);
+				pointGraphics.push(picGraphic);
+				pointGraphics.push(textGraphic);
 			}
-			var clusterLayer = new GraphicsLayer({
-				graphics: clusterGraphics
-			});
-			map.add(clusterLayer);
 		} else {
-			var ptSymbol = {
-				type: "picture-marker",
-				url: "images/marker.png",
-				width: 20,
-				height: 20
-			}
 			for (var i = 0; i < points.length; i++) {
 				var pt = new Point(points[i].Longitude, points[i].Latitude, 4326);
 				var attr = {
 					Name: points[i].Name,
 					Address: points[i].Address
 				}
-				var graphic = new Graphic(pt, ptSymbol, attr);
+				var graphic = new Graphic(pt, symbol, attr);
 				pointGraphics.push(graphic);		
 			}
-			var ptsLayer = new GraphicsLayer({
-				graphics: pointGraphics
-			});
-			map.add(ptsLayer);
 		}
+		return pointGraphics;
 	}
 });

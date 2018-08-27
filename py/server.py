@@ -105,37 +105,54 @@ def showMap():
 
 ''' Using ArcGIS '''
 @app.route('/geocode', methods=['GET'])
-def startGIS():
+def geocode():
     #authorize user
     logger.info('Authorization successful') if checkAuth(request.headers) else abort(403)
     
     conn = connectDB('spatial-db')
-    query = '''
-            SELECT "NAME", "STREET", "CITY", "COUNTRY", "POSTCODE"
-            FROM STRAVELAG
-            '''
-    
+    ptType = request.args['type']
     results = []
-    for result in executeQuery(conn, query):
-        name = result[0]
-        result = result[1:5]
-        addr = ', '.join(result)
-        lat, lng = getLatLong(addr)
 
+    if (ptType == 'agencies'):
+        tableName = 'STRAVELAG'
+        query = '''
+                SELECT "NAME", "STREET", "CITY", "COUNTRY", "POSTCODE"
+                FROM %s
+                ''' % tableName     #SQL INJECTION
+    elif (ptType == 'airports'):
+        tableName = 'SAIRPORTS'
+        query = '''
+                SELECT NAME, LONGITUDE, LATITUDE
+                FROM %s
+                ''' % tableName     #SQL INJECTION
+                    
+    for result in executeQuery(conn, query):
+        if (ptType == 'agencies'):
+            name = result[0]
+            result = result[1:5]
+            addr = ', '.join(result)
+            lat, lng = getLatLong(addr)
+        elif (ptType == 'airports'):
+            name = result[0]
+            lng = result[1]
+            lat = result[2]
+            
         #save to DB
         query = '''
-                UPDATE "STRAVELAG"
+                UPDATE %s
                 SET "LOC_4326" = ST_GeomFromText('POINT(%s %s)', 4326)
                 WHERE "NAME" = '%s';
-                ''' % (lng, lat, name.replace("'", "''")) ###### SQL INJECTION ALERT
+                ''' % (tableName, lng, lat, name.replace("'", "''")) 
+                ###### SQL INJECTION ALERT
 
         executeQuery(conn, query, None, True)
 
         #FOR TESTING
-        point = {'Agency': name,
-                 'Latitude': lat,
-                 'Longitude': lng}
-        results.append(point)
+        results.append({
+            'Place': name,
+            'Latitude': lat,
+            'Longitude': lng
+        })
 
     return str(results)
 
@@ -170,6 +187,24 @@ class SpeechWsNamespace(Namespace):
                     'Address': ', '.join(result[1:4]),
                     'Longitude': result[4],
                     'Latitude': result[5]
+                })
+            logger.info('sending: ' + str(response))
+            return(response)
+        elif (type == "airports"):
+            query = '''
+                    SELECT 
+                    NAME, MUNICIPALITY, ISO_COUNTRY, LONGITUDE, LATITUDE
+                    FROM SAIRPORTS
+                    '''
+            
+            response = []
+            for result in executeQuery(connectDB('spatial-db'), query):
+                if (None in result)
+                response.append({
+                    'Name': result[0],
+                    'Address': ', '.join(result[1:3]),
+                    'Longitude': result[3],
+                    'Latitude': result[4]
                 })
             logger.info('sending: ' + str(response))
             return(response)
