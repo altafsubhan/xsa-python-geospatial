@@ -35,7 +35,7 @@ def connectDB(serviceName):
     return conn
 
 def executeQuery(conn, query, params=None, commit=False):
-    logger.info(query)
+    logger.info(query + ' % ' + str(params))
 
     cursor = conn.cursor()
     cursor.execute(query, params)
@@ -127,7 +127,7 @@ def startGIS():
                 UPDATE "STRAVELAG"
                 SET "LOC_4326" = ST_GeomFromText('POINT(%s %s)', 4326)
                 WHERE "NAME" = '%s';
-                ''' % (lng, lat, name.replace("'", "''"))
+                ''' % (lng, lat, name.replace("'", "''")) ###### SQL INJECTION ALERT
 
         executeQuery(conn, query, None, True)
 
@@ -153,7 +153,6 @@ class SpeechWsNamespace(Namespace):
         self.close()
 
     def on_getPts(self, type):
-        logger.info('received request')
         if (type == "travelAgents"):
             conn = connectDB('spatial-db')
             query = '''
@@ -166,11 +165,58 @@ class SpeechWsNamespace(Namespace):
 
             response = []
             for result in executeQuery(conn, query):
-                response.append(list(result))
+                response.append({
+                    'Name': result[0],
+                    'Address': ', '.join(result[1:4]),
+                    'Longitude': result[4],
+                    'Latitude': result[5]
+                })
             logger.info('sending: ' + str(response))
             return(response)
         else:
             return("error")
+
+    def on_getClusters(self, options):
+        if (options['type'] == 'travelAgents'):
+            tableName = 'STRAVELAG'
+        else:
+            return "error"
+           
+        query = '''
+            SELECT ST_ClusterID() AS CID, 
+            COUNT(*) AS COUNT,
+            ST_ClusterCentroid().ST_X() AS CENTER_LNG,
+            ST_ClusterCentroid().ST_Y() AS CENTER_LAT
+            FROM (
+                SELECT LOC_4326.ST_Transform(1000004326) AS OBJ_LOCATION
+                FROM %s
+                WHERE LOC_4326 IS NOT NULL
+            )
+            GROUP CLUSTER BY OBJ_LOCATION 
+            USING KMEANS CLUSTERS %d;
+        ''' % (tableName, options['number'])    #SQL INJECTION ALERT
+
+        response = []
+        for result in executeQuery(connectDB('spatial-db'), query):
+            response.append({
+                'ClusterID': result[0],
+                'Count': result[1],
+                'Longitude': result[2],
+                'Latitude': result[3]
+            })
+        logger.info('sending: ' + str(response))
+        return(response)
+
+    def on_travelAgencyNameSearch(self, input):
+        conn = connectDB('spatial-db')
+        query = '''
+            SELECT NAME
+            FROM STRAVELAG
+            WHERE CONTAINS(NAME, '%s', FUZZY(0.7));
+        ''' % input.replace('\'', '\'\'')         #SQL INJECTION ALERT
+        #params = input
+        result = executeQuery(conn, query)[0]
+        return "error" if (not result[0]) else result[0]
 
 
 socketio.on_namespace(SpeechWsNamespace('/geospatial'))
