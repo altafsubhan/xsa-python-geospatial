@@ -44,6 +44,7 @@ require([
 	});
 
 	//start websocket connection
+	var globalSocket;
 	var websocketPromise = new Promise((resolve, reject) => {
 		var socket = io.connect('wss://py.hanapm.local.com:30033/geospatial');
 		socket.on('open', resolve(socket));
@@ -138,6 +139,9 @@ require([
 		}
 	});
 
+	
+	var clusterLayer, airportPoints, agencyPoints;		//needed for zoom + clearing screen
+
 	//search
 	var searchSubmitBtn = document.getElementById('searchSubmit');
 	var searchField = document.getElementById('searchField');
@@ -174,6 +178,11 @@ require([
 
 	//actual zoom in function
 	function zoomIn(input) {
+		var pointGraphics = [];
+		for (var i = 0; i < map.layers.items.length; i++) {
+			pointGraphics = pointGraphics.concat(map.layers.items[i].graphics.items);
+		}
+		console.log(pointGraphics);
 		for (var i = 0; i < pointGraphics.length; i++) {
 			if (pointGraphics[i].attributes.Name === input || 
 					input === pointGraphics[i]
@@ -203,8 +212,6 @@ require([
 			}
 		}
 	}
- 
-	var clusterLayer;		//needed for clearing screen when plotting points
 
 	//for plotting travel agencies
 	var showTravelAgentsBtn = document.getElementById('showTravelAgentsBtn');
@@ -228,26 +235,6 @@ require([
 		});
 	}
 
-	//for plotting clusters
-	var clustersBtn = document.getElementById('showClustersBtn');
-	clustersBtn.addEventListener("click", showClusters);
-	function showClusters() {
-		options = {
-			type: "travelAgents",
-			number: view.zoom + 5
-		}
-		globalSocket.emit('getClusters', options, pts => {
-			if (pts !== "error") {
-				clusterPoints = makePointsList(pts, null, true)
-				clusterLayer = new GraphicsLayer({
-					graphics: clusterPoints
-				});
-				map.removeAll();
-				map.add(clusterLayer);
-			}
-		})
-	}
-
 	//for plotting major airports
 	var showAirportsBtn = document.getElementById('showAirportsBtn');
 	showAirportsBtn.addEventListener("click", showAirports);
@@ -269,6 +256,43 @@ require([
 			}
 		});
 	}
+
+	//for plotting clusters
+	var agencyClustersBtn = document.getElementById('showAgencyClustersBtn');
+	agencyClustersBtn.addEventListener("click", () => {
+		options = {
+			type: 'travelAgents',
+			number: view.zoom + 5
+		}
+		globalSocket.emit('getClusters', options, pts => {
+			if (pts !== "error") {
+				clusterPoints = makePointsList(pts, null, true)
+				clusterLayer = new GraphicsLayer({
+					graphics: clusterPoints
+				});
+				map.removeAll();
+				map.add(clusterLayer);
+			}
+		});
+	});
+
+	var airportClustersBtn = document.getElementById('showAirportClustersBtn');
+	airportClustersBtn.addEventListener("click", () => {
+		options = {
+			type: 'airports',
+			number: view.zoom + 8
+		}
+		globalSocket.emit('getClusters', options, pts => {
+			if (pts !== "error") {
+				clusterPoints = makePointsList(pts, null, true)
+				clusterLayer = new GraphicsLayer({
+					graphics: clusterPoints
+				});
+				map.removeAll();
+				map.add(clusterLayer);
+			}
+		});
+	});
 
 	//prepare list of points to show on map
 	function makePointsList(points, symbol, cluster=false) {

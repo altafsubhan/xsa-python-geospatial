@@ -199,7 +199,6 @@ class SpeechWsNamespace(Namespace):
             
             response = []
             for result in executeQuery(connectDB('spatial-db'), query):
-                if (None in result)
                 response.append({
                     'Name': result[0],
                     'Address': ', '.join(result[1:3]),
@@ -214,6 +213,8 @@ class SpeechWsNamespace(Namespace):
     def on_getClusters(self, options):
         if (options['type'] == 'travelAgents'):
             tableName = 'STRAVELAG'
+        elif (options['type'] == 'airports'):
+            tableName = 'SAIRPORTS'
         else:
             return "error"
            
