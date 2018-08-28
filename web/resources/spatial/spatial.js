@@ -7,7 +7,10 @@ require([
 	"esri/geometry/Polygon",
 	"esri/geometry/support/webMercatorUtils",
 	"esri/geometry/Point",
-	"esri/layers/GraphicsLayer"
+	"esri/layers/GraphicsLayer",
+	"esri/renderers/HeatmapRenderer",
+    "esri/config",
+	"esri/layers/CSVLayer"
 ], function (
 	Map,
 	MapView,
@@ -17,7 +20,10 @@ require([
 	Polygon,
 	webMercatorUtils,
 	Point,
-	GraphicsLayer
+	GraphicsLayer,
+	HeatmapRenderer,
+	esriConfig,
+	CSVLayer
 ) {
 	//create map obj with srid 4326
 	var map = new Map({
@@ -294,10 +300,44 @@ require([
 		});
 	});
 
+	heatmap().catch(function errback(error) {
+        console.error("Creating legend failed. ", error);
+    });
+
+	function heatmap(){
+		url = "https://raw.githubusercontent.com/subhanaltaf/xsa-python-geospatial/master/db/src/data/loads/travel_agencies_latlng.csv"
+	    esriConfig.request.corsEnabledServers.push(url);
+
+		const renderer = {
+        type: "heatmap",
+        colorStops: [
+        {
+          color: "rgba(63, 40, 102, 0)",
+          ratio: 0
+        },
+        {
+          color: "#000000",
+          ratio: 1
+        }],
+        maxPixelIntensity: 25,
+        minPixelIntensity: 0
+      };
+
+		const layer = new CSVLayer({
+        url: url,
+        title: "Magnitude 2.5+ earthquakes from the last week",
+		latitudeField: "LAT",
+		longitudeField: "LNG",
+        renderer: renderer
+      });
+		map.add(layer)
+		console.log("ok")
+		return layer;
+	}
+
 	//prepare list of points to show on map
 	function makePointsList(points, symbol, cluster=false) {
 		var pointGraphics = []
-		
 		if (cluster) {
 			for (var i = 0; i < points.length; i++) {
 				var count = points[i].Count;
