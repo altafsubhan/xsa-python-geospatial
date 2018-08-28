@@ -7,15 +7,15 @@
 
     <link rel="stylesheet" href="https://js.arcgis.com/4.8/esri/css/main.css">
     <link rel="stylesheet" href="spatial.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
 	<script>
-    var dojoConfig = {
-      has: {
-        "esri-featurelayer-webgl": 1
-      }
-    };
-  </script>
-
+        var dojoConfig = {
+            has: {
+                "esri-featurelayer-webgl": 1
+            }
+        };
+    </script>
     <script src="https://js.arcgis.com/4.8/"></script>
     <script type="text/javascript" src="spatial.js"></script>
 </head>
@@ -32,12 +32,15 @@
             <input id="searchSubmit" type="button" value="Search">
         </div>
         <div id="controls">
-            <button id="showTravelAgentsBtn" class="agencyBtn">Travel Agencies</button>
+            <button id="showTravelAgentsBtn" class="agencyBtn">Travel Agents</button>
             <button id="showAgencyClustersBtn" class="agencyBtn">Clustered</button>
             <button id="showAgencyHeatMapBtn" class="agencyBtn">Heat Map</button>
             <button id="showAirportsBtn" class="airportBtn">Major Airports</button>
             <button id="showAirportClustersBtn" class="airportBtn">Clustered</button>
             <button id="showAirportHeatMapBtn" class="airportBtn">Heat Map</button>
         </div>
+        <div id="selected"><h3>Selected Agencies:</h3></div>
+        <div id="graph"></div>
+        <div id="distance"></div>
     </div>
 </body>

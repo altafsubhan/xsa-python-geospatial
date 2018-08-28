@@ -244,17 +244,96 @@ class SpeechWsNamespace(Namespace):
         return(response)
 
     def on_travelAgencyNameSearch(self, input):
-        conn = connectDB('spatial-db')
         query = '''
-            SELECT NAME
+            SELECT NAME, AGENCYNUM, LOC_4326.ST_X(), LOC_4326.ST_Y()
             FROM STRAVELAG
             WHERE CONTAINS(NAME, '%s', FUZZY(0.7));
         ''' % input.replace('\'', '\'\'')         #SQL INJECTION ALERT
         #params = input
-        result = executeQuery(conn, query)[0]
-        return "error" if (not result[0]) else result[0]
+        
+        result = executeQuery(connectDB('spatial-db'), query)
+        name = result[0][0]
+        agency = result[0][1]
+        lng = result[0][2]
+        lat = result[0][3]
 
+        salesQuery = '''
+            SELECT SALE_DATE, SUM(TOTAL_PRICE) 
+            FROM STRANSACTIONS 
+            WHERE AGENCYNUM IN (%s)
+            AND SALE_DATE > ADD_DAYS(CURRENT_DATE, -28)
+            GROUP BY SALE_DATE
+            ORDER BY SALE_DATE ASC
+        ''' % (agency)     #SQL INJECTION
 
+        result = executeQuery(connectDB('spatial-db'), salesQuery)
+        x = [str(i[0]) for i in result]
+        y = [i[1] for i in result]
+        salesResponse = {'x': x, 'y': y}
+
+        airportQuery = '''
+            SELECT TOP 1 LOC_4326.ST_Distance(
+                ST_GeomFromText('POINT(%s %s)', 4326), 'kilometer')
+            AS DISTANCE, NAME
+            FROM SAIRPORTS ORDER BY Distance ASC;	
+         ''' % (lng, lat)
+
+        result = executeQuery(connectDB('spatial-db'), airportQuery)[0]
+        distanceResponse = {
+            'Name': result[1],
+            'Distance': result[0]
+        }
+
+        response = [name, salesResponse, distanceResponse]
+        return response
+
+    def on_polygonDrawn(self, polygonCoord):
+        polygonString = 'POLYGON(('
+        for coord in polygonCoord:
+            polygonString += str(coord[0]) + ' ' + str(coord[1]) + ', '
+        polygonString = polygonString[:-2] + '))'
+        withinQuery = '''
+            SELECT LOC_4326.ST_Transform(1000004326).ST_Within(
+                ST_GeomFromText('%s', 4326).ST_Transform(1000004326))
+            AS WITHIN, 
+            NAME, LOC_4326.ST_X() AS LNG, LOC_4326.ST_Y() AS LAT, AGENCYNUM
+            FROM STRAVELAG
+            WHERE LOC_4326 IS NOT NULL
+            ORDER BY WITHIN ASC
+        ''' % polygonString     #SQL INJECTION
+
+        agencyResponse = []
+        agencies = []
+        for result in executeQuery(connectDB('spatial-db'), withinQuery):
+            if (result[0] == 1):
+                agencyResponse.append({
+                    "Name": result[1],
+                    "Latitude": result[2],
+                    "Longitude": result[3]
+                })
+                agencies.append(result[4])
+        logger.info(agencyResponse)
+        logger.info(agencies)
+
+        salesQuery = '''
+            SELECT SALE_DATE, SUM(TOTAL_PRICE) 
+            FROM STRANSACTIONS 
+            WHERE AGENCYNUM IN (%s)
+            AND SALE_DATE > ADD_DAYS(CURRENT_DATE, -28)
+            GROUP BY SALE_DATE
+            ORDER BY SALE_DATE ASC
+        ''' % (str(agencies)[1:-1])     #SQL INJECTION
+
+        result = executeQuery(connectDB('spatial-db'), salesQuery)
+        x = [str(i[0]) for i in result]
+        y = [i[1] for i in result]
+        salesResponse = {'x': x, 'y': y}
+        logger.info(salesResponse)
+
+        response = [agencyResponse, salesResponse]
+
+        return response
+        
 socketio.on_namespace(SpeechWsNamespace('/geospatial'))
 
 ''' START APP '''

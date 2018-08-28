@@ -38,7 +38,7 @@ require([
 		zoom: 5,
 		center: [15.2551, 54.5260], //center of europe
 		padding: {
-			left: 320
+			left: 400
 		} //for side panel
 	});
 
@@ -71,6 +71,10 @@ require([
 		}
 	});
 
+	
+	var clusterLayer, airportPoints, agencyPoints, heatMapLayer, showTravelAgentsBtn;		
+	//needed for zoom + clearing screen
+
 	//draw polygon button for user polygon input
 	view.ui.add("draw-polygon", "top-left");
 	var pointGraphics = [];
@@ -82,7 +86,11 @@ require([
 
 		//create polygon when map area clicked
 		var drawPolygonButton = document.getElementById("draw-polygon");
-		drawPolygonButton.addEventListener("click", function () {
+		drawPolygonButton.addEventListener("click", function () {	
+			map.remove(clusterLayer);
+			map.remove(heatMapLayer);
+			showTravelAgentsBtn.click();
+			
 			view.graphics.remove(graphic);
 			enableCreatePolygon(draw, view);
 		});
@@ -133,6 +141,9 @@ require([
 
 		//use polygon
 		function doneDrawingPolygon(event){
+			//focus on area
+			
+			//get coordinates
 			vertices = event.vertices;
 			polygonCoord = [];
 			for (var i = 0; i < vertices.length; i++) {
@@ -140,13 +151,47 @@ require([
 					vertices[i][0], vertices[i][1]
 				));
 			}
-			console.log(polygonCoord);
 			//send to Python
+			polygonCoord.push(polygonCoord[0]);		//required for HANA
+			globalSocket.emit('polygonDrawn', polygonCoord, response => {
+				console.log(response);
+
+				//show selected
+				var selectedHTML = document.getElementById('selected');
+				var ul = document.createElement('ul');
+				for (var i = 0; i < response[0].length; i++) {
+					var li = document.createElement('li');
+					li.innerHTML = response[0][i].Name;
+					ul.appendChild(li)
+				}
+				selectedHTML.innerHTML = '<h3>Selected Agencies:</h3>';
+				selectedHTML.appendChild(ul);
+				selectedHTML.style.visibility = 'visible';
+
+				//show graph
+				var trace = {
+					x: response[1].x,
+					y: response[1].y,
+					type: 'scatter',
+					name: "Total Sales for August in CAD"
+				}
+				var layout = {
+					title: 'Total Sales for August in CAD',
+					xaxis: {
+					  title: 'Date'
+					},
+					yaxis: {
+					  title: 'Revenue ($)'
+					}
+				  };
+				Plotly.newPlot('graph', [trace], layout);
+				var graphHTML = document.getElementById('graph');
+				graphHTML.style.visibility = 'visible';
+				var distanceHTML = document.getElementById('distance');
+				distanceHTML.style.visibility = 'hidden';
+			});
 		}
 	});
-
-	
-	var clusterLayer, airportPoints, agencyPoints;		//needed for zoom + clearing screen
 
 	//search
 	var searchSubmitBtn = document.getElementById('searchSubmit');
@@ -165,8 +210,33 @@ require([
 
 	function searchZoom(input) {
 		globalSocket.emit('travelAgencyNameSearch', input, response => {
-			if (response !== "error") name = response;
-			console.log('received after search: ' +  name + '; ' + response)
+			if (response !== "error") name = response[0];
+			//show graph
+			var trace = {
+				x: response[1].x,
+				y: response[1].y,
+				type: 'scatter',
+				name: "Total Sales for August in CAD"
+			}
+			var layout = {
+				title: 'Total Sales for August in CAD',
+				xaxis: {
+				  title: 'Date'
+				},
+				yaxis: {
+				  title: 'Revenue ($)'
+				}
+			  };
+			Plotly.newPlot('graph', [trace], layout);
+			var graphHTML = document.getElementById('graph');
+			graphHTML.style.visibility = 'visible';			
+			
+			var distanceHTML = document.getElementById('distance');
+			var distanceText = '<p><strong>Closest airport:</strong> ' 
+								  +  response[2].Name + ' at a distance of: ' 
+								  + response[2].Distance.toFixed(2) + ' km.</p>';
+			distanceHTML.innerHTML = distanceText;
+			distanceHTML.style.visibility = 'visible';
 			zoomIn(name);
 		});
 	}
@@ -188,7 +258,6 @@ require([
 		for (var i = 0; i < map.layers.items.length; i++) {
 			pointGraphics = pointGraphics.concat(map.layers.items[i].graphics.items);
 		}
-		console.log(pointGraphics);
 		for (var i = 0; i < pointGraphics.length; i++) {
 			if (pointGraphics[i].attributes.Name === input || 
 					input === pointGraphics[i]
@@ -220,7 +289,7 @@ require([
 	}
 
 	//for plotting travel agencies
-	var showTravelAgentsBtn = document.getElementById('showTravelAgentsBtn');
+	showTravelAgentsBtn = document.getElementById('showTravelAgentsBtn');
 	showTravelAgentsBtn.addEventListener("click", showTravelAgents);
 	function showTravelAgents() {
 		globalSocket.emit('getPts', "travelAgents", pts => {
@@ -235,7 +304,9 @@ require([
 				var agencyPtsLayer = new GraphicsLayer({
 					graphics: agencyPoints
 				});
+				refreshPanel();
 				map.remove(clusterLayer);
+				map.remove(heatMapLayer);
 				map.add(agencyPtsLayer);
 			}
 		});
@@ -257,7 +328,9 @@ require([
 				var airportPtsLayer = new GraphicsLayer({
 					graphics: airportPoints
 				});
+				refreshPanel();
 				map.remove(clusterLayer);
+				map.remove(heatMapLayer);
 				map.add(airportPtsLayer);
 			}
 		});
@@ -276,6 +349,7 @@ require([
 				clusterLayer = new GraphicsLayer({
 					graphics: clusterPoints
 				});
+				refreshPanel();
 				map.removeAll();
 				map.add(clusterLayer);
 			}
@@ -294,46 +368,89 @@ require([
 				clusterLayer = new GraphicsLayer({
 					graphics: clusterPoints
 				});
+				refreshPanel();
 				map.removeAll();
 				map.add(clusterLayer);
 			}
 		});
 	});
 
-	heatmap().catch(function errback(error) {
-        console.error("Creating legend failed. ", error);
-    });
-
-	function heatmap(){
-		url = "https://raw.githubusercontent.com/subhanaltaf/xsa-python-geospatial/master/db/src/data/loads/travel_agencies_latlng.csv"
-	    esriConfig.request.corsEnabledServers.push(url);
+	//heatmap
+	var baseURL = "https://raw.githubusercontent.com/subhanaltaf/xsa-python-geospatial/master/db/src/data/loads/"
+	var agencyHeatMapBtn = document.getElementById('showAgencyHeatMapBtn');
+	agencyHeatMapBtn.addEventListener("click", () => {
+		url = baseURL + "travel_agencies_latlng.csv";
+		esriConfig.request.corsEnabledServers.push(url);
 
 		const renderer = {
-        type: "heatmap",
-        colorStops: [
-        {
-          color: "rgba(63, 40, 102, 0)",
-          ratio: 0
-        },
-        {
-          color: "#000000",
-          ratio: 1
-        }],
-        maxPixelIntensity: 25,
-        minPixelIntensity: 0
-      };
+        	type: "heatmap",
+        	colorStops: [
+				{ color: "rgba(63, 40, 102, 0)", ratio: 0 },
+				{ color: "#472b77", ratio: 0.083 },
+				{ color: "#4e2d87", ratio: 0.166 },
+				{ color: "#563098", ratio: 0.249 },
+				{ color: "#5d32a8", ratio: 0.332 },
+				{ color: "#6735be", ratio: 0.415 },
+				{ color: "#7139d4", ratio: 0.498 },
+				{ color: "#7b3ce9", ratio: 0.581 },
+				{ color: "#853fff", ratio: 0.664 },
+				{ color: "#a46fbf", ratio: 0.747 },
+				{ color: "#c29f80", ratio: 0.830 },
+				{ color: "#e0cf40", ratio: 0.913 },
+				{ color: "#ffff00", ratio: 1 }],
+			maxPixelIntensity: 25,
+			minPixelIntensity: 0
+    	};
 
-		const layer = new CSVLayer({
-        url: url,
-        title: "Magnitude 2.5+ earthquakes from the last week",
-		latitudeField: "LAT",
-		longitudeField: "LNG",
-        renderer: renderer
-      });
-		map.add(layer)
-		console.log("ok")
-		return layer;
-	}
+	  	heatMapLayer = new CSVLayer({
+        	url: url,
+        	title: "Travel Agencies",
+			latitudeField: "LAT",
+			longitudeField: "LNG",
+        	renderer: renderer
+		});
+
+		refreshPanel();  
+	  	map.removeAll();
+		map.add(heatMapLayer);
+	});
+
+	var airportHeatMapBtn = document.getElementById('showAirportHeatMapBtn');
+	airportHeatMapBtn.addEventListener("click", () => {
+		url = baseURL + "airports.csv";
+		esriConfig.request.corsEnabledServers.push(url);
+
+		const renderer = {
+        	type: "heatmap",
+        	colorStops: [
+				{ color: "rgba(63, 40, 102, 0)", ratio: 0 },
+				{ color: "#472b77", ratio: 0.083 },
+				{ color: "#4e2d87", ratio: 0.166 },
+				{ color: "#563098", ratio: 0.249 },
+				{ color: "#5d32a8", ratio: 0.332 },
+				{ color: "#6735be", ratio: 0.415 },
+				{ color: "#7139d4", ratio: 0.498 },
+				{ color: "#7b3ce9", ratio: 0.581 },
+				{ color: "#853fff", ratio: 0.664 },
+				{ color: "#a46fbf", ratio: 0.747 },
+				{ color: "#c29f80", ratio: 0.830 },
+				{ color: "#e0cf40", ratio: 0.913 },
+				{ color: "#ffff00", ratio: 1 }],
+			maxPixelIntensity: 25,
+			minPixelIntensity: 0
+    	};
+
+	  	heatMapLayer = new CSVLayer({
+        	url: url,
+        	title: "Major Airports",
+			latitudeField: "LATITUDE",
+			longitudeField: "LONGITUDE",
+        	renderer: renderer
+		});
+		  
+	  	map.removeAll();
+		map.add(heatMapLayer);
+	});
 
 	//prepare list of points to show on map
 	function makePointsList(points, symbol, cluster=false) {
@@ -375,5 +492,13 @@ require([
 			}
 		}
 		return pointGraphics;
+	}
+	function refreshPanel(){
+		var distanceHTML = document.getElementById('distance');
+		distanceHTML.style.visibility = 'hidden';
+		var graphHTML = document.getElementById('graph');
+		graphHTML.style.visibility = 'hidden';
+		var selectedHTML = document.getElementById('selected');
+		selectedHTML.style.visibility = 'hidden';
 	}
 });
