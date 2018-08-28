@@ -1,14 +1,8 @@
-﻿ID,TYPE,NAME,LATITUDE,LONGITUDE,LOC_4326,CONTINENT,ISO_COUNTRY,ISO_REGION,MUNICIPALITY,SCHEDULED_SERVICE,IATA_CODE
+ID,TYPE,NAME,LATITUDE,LONGITUDE,LOC_4326,CONTINENT,ISO_COUNTRY,ISO_REGION,MUNICIPALITY,SCHEDULED_SERVICE,IATA_CODE
 45229,large_airport,Mar de CortÃ©s International Airport,31.351621,-113.305864,,NA,MX,MX-SON,Puerto PeÃ±asco,yes,PPE
-326154,large_airport,MEL,0,0,,OC,AU,AU-VIC,,no,
-327169,large_airport,Frank,0,0,,OC,AU,AU-SA,australia,no,
 67,large_airport,Port Moresby Jacksons International Airport,-9.443380356,147.2200012,,OC,PG,PG-NCD,Port Moresby,yes,POM
 123,large_airport,Keflavik International Airport,63.98500061,-22.60560036,,EU,IS,IS-2,ReykjavÃ­k,yes,KEF
 4614,large_airport,PriÅ¡tina International Airport,42.5728,21.035801,,EU,XK,XK-01,Prishtina,yes,PRN
-328616,large_airport,Osman Ibrahim,0,0,,NA,BS,BS-EX,All,no,
-320983,large_airport,Cyll,53.310365,-110.072021,,NA,CA,CA-U-A,,yes,
-326149,large_airport,yyz,0,0,,NA,CA,CA-ON,,no,
-326346,large_airport,CMN,0,0,,AF,MA,MA-CAS,,yes,CMN
 1717,large_airport,Edmonton International Airport,53.30970001,-113.5800018,,NA,CA,CA-AB,Edmonton,yes,YEG
 1770,large_airport,Halifax / Stanfield International Airport,44.88079834,-63.50859833,,NA,CA,CA-NS,Halifax,yes,YHZ
 1840,large_airport,Ottawa Macdonald-Cartier International Airport,45.32249832,-75.66919708,,NA,CA,CA-ON,Ottawa,yes,YOW
@@ -47,11 +41,9 @@
 2270,large_airport,Karlsruhe Baden-Baden Airport,48.77939987,8.080499649,,EU,DE,DE-BW,Baden-Baden,yes,FKB
 2301,large_airport,Lennart Meri Tallinn Airport,59.41329956,24.83279991,,EU,EE,EE-37,Tallinn,yes,TLL
 2307,large_airport,Helsinki Vantaa Airport,60.31719971,24.9633007,,EU,FI,FI-ES,Helsinki,yes,HEL
-328135,large_airport,Cairo,0,0,,AF,EG,EG-C,,yes,
 2385,large_airport,Belfast International Airport,54.65750122,-6.215829849,,EU,GB,GB-NIR,Belfast,yes,BFS
 2387,large_airport,George Best Belfast City Airport,54.61809921,-5.872499943,,EU,GB,GB-NIR,Belfast,yes,BHD
 2389,large_airport,Birmingham International Airport,52.45389938,-1.748029947,,EU,GB,GB-ENG,Birmingham,yes,BHX
-2398,large_airport,Manchester Airport,53.35369873,-2.274950027,,EU,GB,GB-ENG,Manchester,yes,MAN
 2401,large_airport,Robin Hood Doncaster Sheffield Airport,53.48053781,-1.010656357,,EU,GB,GB-ENG,Doncaster,yes,DSA
 2415,large_airport,Cardiff International Airport,51.39670181,-3.343329906,,EU,GB,GB-WLS,Cardiff,yes,CWL
 2417,large_airport,Bristol Airport,51.382702,-2.71909,,EU,GB,GB-ENG,Bristol,yes,BRS
@@ -106,14 +98,11 @@
 2766,large_airport,Vilnius International Airport,54.634102,25.285801,,EU,LT,LT-VL,Vilnius,yes,VNO
 2775,large_airport,Cape Town International Airport,-33.96480179,18.60169983,,AF,ZA,ZA-WC,Cape Town,yes,CPT
 2783,large_airport,George Airport,-34.0056,22.378902,,AF,ZA,ZA-WC,George,yes,GRJ
-2792,large_airport,OR Tambo International Airport,-26.1392,28.246,,AF,ZA,ZA-GT,Johannesburg,yes,JNB
 300795,large_airport,King Shaka International Airport,-29.61444444,31.11972222,,AF,ZA,ZA-NL,Durban,yes,DUR
+2792,large_airport,OR Tambo International Airport,-26.1392,28.246,,AF,ZA,ZA-GT,Johannesburg,yes,JNB
 31055,large_airport,OR Tambo International Airport,-26.1392,28.246,,AF,ZA,ZA-GT,Johannesburg,yes,JNB
 2879,large_airport,Sir Charles Gaetan Duval Airport,-19.7577,63.361,,AF,MU,MU-VP,Port Mathurin,yes,RRG
 2894,large_airport,Kenneth Kaunda International Airport Lusaka,-15.33080006,28.45260048,,AF,ZM,ZM-09,Lusaka,yes,LUN
-320984,large_airport,[Duplicate] Pic,55.505694,-4.586792,,EU,GB,GB-SCT,Prestwick,no,
-326150,large_airport,LHR,0,0,,EU,GB,GB-ENG,,no,
-326151,large_airport,heathrow,0,0,,EU,GB,GB-ENG,,no,
 3081,large_airport,Gran Canaria Airport,27.93190002,-15.38659954,,EU,ES,ES-CN,Gran Canaria Island,yes,LPA
 3083,large_airport,Tenerife South Airport,28.04450035,-16.57250023,,EU,ES,ES-CN,Tenerife Island,yes,TFS
 3084,large_airport,Tenerife Norte Airport,28.48270035,-16.34149933,,EU,ES,ES-CN,Tenerife Island,yes,TFN
@@ -131,8 +120,6 @@
 3247,large_airport,Juba International Airport,4.872010231,31.60110092,,AF,SS,SS-17,Juba,yes,JUB
 3249,large_airport,Khartoum International Airport,15.58950043,32.55319977,,AF,SD,SD-03,Khartoum,yes,KRT
 3251,large_airport,Julius Nyerere International Airport,-6.87811,39.202599,,AF,TZ,TZ-02,Dar es Salaam,yes,DAR
-309298,large_airport,Sungai Siring International Airport,-0.373611,117.255556,,AS,ID,ID-KI,Samarinda,yes,
-326654,large_airport,Libr,0,0,,EU,IT,IT-U-A,Brindisi,yes,
 16091,large_airport,Albuquerque International Sunport Airport,35.040199,-106.609001,,NA,US,US-NM,Albuquerque,yes,ABQ
 3364,large_airport,Andrews Air Force Base,38.810799,-76.866997,,NA,US,US-MD,Camp Springs,no,ADW
 3366,large_airport,Fort Worth Alliance Airport,32.98759842,-97.31880188,,NA,US,US-TX,Fort Worth,no,AFW
@@ -231,6 +218,7 @@
 3675,large_airport,Memphis International Airport,35.04240036,-89.97669983,,NA,US,US-TN,Memphis,yes,MEM
 3680,large_airport,Dobbins Air Reserve Base,33.91540146,-84.51629639,,NA,US,US-GA,Marietta,no,MGE
 3681,large_airport,Montgomery Regional (Dannelly Field) Airport,32.30059814,-86.39399719,,NA,US,US-AL,Montgomery,yes,MGM
+2398,large_airport,Manchester Airport,53.35369873,-2.274950027,,EU,GB,GB-ENG,Manchester,yes,MAN
 3684,large_airport,Manchester Airport,42.93259811,-71.43569946,,NA,US,US-NH,Manchester,yes,MHT
 3685,large_airport,Miami International Airport,25.79319954,-80.29060364,,NA,US,US-FL,Miami,yes,MIA
 3690,large_airport,General Mitchell International Airport,42.94720078,-87.89659882,,NA,US,US-WI,Milwaukee,yes,MKE
@@ -320,7 +308,6 @@
 4137,large_airport,Lyon Saint-ExupÃ©ry Airport,45.725556,5.081111,,EU,FR,FR-V,Lyon,yes,LYS
 4155,large_airport,Marseille Provence Airport,43.43927192,5.221424103,,EU,FR,FR-U,Marseille,yes,MRS
 4156,large_airport,Nice-CÃ´te d'Azur Airport,43.65840149,7.215869904,,EU,FR,FR-U,Nice,yes,NCE
-4168,large_airport,Avord (BA 702) Air Base,47.053299,2.6325,,EU,FR,FR-F,Avord,no,
 4185,large_airport,Charles de Gaulle International Airport,49.01279831,2.549999952,,EU,FR,FR-J,Paris,yes,CDG
 4189,large_airport,Paris-Orly Airport,48.7233333,2.3794444,,EU,FR,FR-J,Paris,yes,ORY
 4226,large_airport,EuroAirport Basel-Mulhouse-Freiburg Airport,47.59,7.5291667,,EU,FR,FR-A,BÃ¢le/Mulhouse,yes,BSL
@@ -375,7 +362,6 @@
 4610,large_airport,Belgrade Nikola Tesla Airport,44.81840134,20.3090992,,EU,RS,RS-00,Belgrade,yes,BEG
 4613,large_airport,Podgorica Airport,42.359402,19.2519,,EU,ME,ME-16,Podgorica,yes,TGD
 4617,large_airport,M. R. Å tefÃ¡nik Airport,48.17020035,17.21269989,,EU,SK,SK-BL,Bratislava,yes,BTS
-326345,large_airport,cmn,0,0,,AF,MA,MA-U-A,,yes,
 4636,large_airport,Punta Cana International Airport,18.56739998,-68.36340332,,NA,DO,DO-11,Punta Cana,yes,PUJ
 4638,large_airport,Las AmÃ©ricas International Airport,18.42970085,-69.66889954,,NA,DO,DO-01,Santo Domingo,yes,SDQ
 4680,large_airport,Norman Manley International Airport,17.93569946,-76.78749847,,NA,JM,JM-01,Kingston,yes,KIN
@@ -402,7 +388,6 @@
 5063,large_airport,Wellington International Airport,-41.32720184,174.8049927,,OC,NZ,NZ-WGN,Wellington,yes,WLG
 5079,large_airport,Bahrain International Airport,26.27079964,50.63359833,,AS,BH,BH-15,Manama,yes,BAH
 5087,large_airport,King Fahd International Airport,26.47120094,49.79790115,,AS,SA,SA-04,Ad Dammam,yes,DMM
-5089,large_airport,King Abdulaziz Air Base,26.26539993,50.15200043,,AS,SA,SA-04,,no,DHA
 5097,large_airport,King Abdulaziz International Airport,21.6796,39.156502,,AS,SA,SA-02,Jeddah,yes,JED
 5101,large_airport,Prince Mohammad Bin Abdulaziz Airport,24.5534,39.705101,,AS,SA,SA-03,Medina,yes,MED
 5112,large_airport,King Khaled International Airport,24.95759964,46.69879913,,AS,SA,SA-01,Riyadh,yes,RUH
@@ -432,7 +417,6 @@
 5388,large_airport,Ted Stevens Anchorage International Airport,61.17440033,-149.9960022,,NA,US,US-AK,Anchorage,yes,ANC
 5433,large_airport,Antonio B. Won Pat International Airport,13.48340034,144.7960052,,OC,GU,GU-U-A,"HagÃ¥tÃ±a, Guam International Airport",yes,GUM
 308633,large_airport,Laguindingan Airport,8.612203,124.456496,,AS,PH,PH-MSR,Cagayan de Oro City,yes,CGY
-325947,large_airport,Northern Cagayan International Airport,18.182388,121.745853,,AS,PH,PH-CAG,Lal-lo,yes,
 5453,large_airport,Daniel K Inouye International Airport,21.32062,-157.924228,,NA,US,US-HI,Honolulu,yes,HNL
 30601,large_airport,New Islamabad International Airport,33.560713,72.851613,,AS,PK,PK-IS,Islamabad,yes,ISB
 44686,large_airport,Hamad International Airport,25.273056,51.608056,,AS,QA,QA-DA,Doha,yes,DOH
@@ -454,20 +438,14 @@
 5639,large_airport,Jeju International Airport,33.51129913,126.4929962,,AS,KR,KR-49,Jeju City,yes,CJU
 5642,large_airport,Gimhae International Airport,35.17950058,128.9380035,,AS,KR,KR-26,Busan,yes,PUS
 5653,large_airport,Incheon International Airport,37.46910095,126.4509964,,AS,KR,KR-28,Seoul,yes,ICN
-5655,large_airport,Osan Air Base,37.090599,127.029999,,AS,KR,KR-41,,no,OSN
 5656,large_airport,Gimpo International Airport,37.5583,126.791,,AS,KR,KR-11,Seoul,yes,GMP
 5663,large_airport,Cheongju International Airport/Cheongju Air Base (K-59/G-513),36.717008,127.498741,,AS,KR,KR-43,Cheongju,yes,CJJ
 5671,large_airport,Naha Airport,26.19580078,127.6460037,,AS,JP,JP-47,Naha,yes,OKA
-5673,large_airport,Kadena Air Base,26.3556,127.767998,,AS,JP,JP-47,,no,DNA
 5687,large_airport,Diosdado Macapagal International Airport,15.186,120.559998,,AS,PH,PH-PAM,Angeles/Mabalacat,yes,CRK
 5689,large_airport,Ninoy Aquino International Airport,14.5086,121.019997,,AS,PH,PH-U-A,Manila,yes,MNL
 5697,large_airport,Francisco Bangoy International Airport,7.125520229,125.6460037,,AS,PH,PH-DAV,Davao City,yes,DVO
 5742,large_airport,Mactan Cebu International Airport,10.30749989,123.9789963,,AS,PH,PH-CEB,Lapu-Lapu City,yes,CEB
-41136,large_airport,Lipetsk Air Base,52.63499832,39.44499969,,EU,RU,RU-LIP,Lipetsk,no,
 42924,large_airport,Grozny North Airport,43.388302,45.698601,,EU,RU,RU-CE,Grozny,yes,GRV
-35102,large_airport,Ukrainka Air Base,51.169997,128.445007,,EU,RU,RU-AMU,Belogorsk,no,
-35046,large_airport,Olenya Air Base,68.15180206,33.46390152,,EU,RU,RU-MUR,Olenegorsk,no,
-328105,large_airport,"Ash Sharqiyah Region, Saudi Arabia",1,3,,AS,SA,SA-U-A,,no,
 5781,large_airport,Ministro Pistarini International Airport,-34.8222,-58.5358,,SA,AR,AR-B,Buenos Aires,yes,EZE
 5867,large_airport,Val de Cans/JÃºlio Cezar Ribeiro International Airport,-1.37925005,-48.47629929,,SA,BR,BR-PA,BelÃ©m,yes,BEL
 5872,large_airport,Presidente Juscelino Kubistschek International Airport,-15.86916733,-47.92083359,,SA,BR,BR-DF,BrasÃ­lia,yes,BSB
@@ -492,8 +470,6 @@
 6384,large_airport,Luis Munoz Marin International Airport,18.43939972,-66.00180054,,NA,PR,PR-U-A,San Juan,yes,SJU
 44483,large_airport,Enfidha - Hammamet International Airport,36.075833,10.438611,,AF,TN,TN-51,Enfidha,yes,NBE
 6406,large_airport,Princess Juliana International Airport,18.04100037,-63.10889816,,NA,SX,SX-U-A,Saint Martin,yes,SXM
-317457,large_airport,Ä°stanbul New Airport,41.262948,28.74133,,AS,TR,TR-34,,yes,IST
-324731,large_airport,Ã‡ukurova Airport,36.895545,35.069381,,AS,TR,TR-33,Tarsus,no,
 6421,large_airport,Almaty Airport,43.35210037,77.04049683,,AS,KZ,KZ-ALM,Almaty,yes,ALA
 6423,large_airport,Astana International Airport,51.02220154,71.46690369,,AS,KZ,KZ-AKM,Astana,yes,TSE
 6426,large_airport,Manas International Airport,43.06129837,74.4776001,,AS,KG,KG-C,Bishkek,yes,FRU
@@ -512,8 +488,6 @@
 6507,large_airport,Tolmachevo Airport,55.01259995,82.65070343,,AS,RU,RU-NVS,Novosibirsk,yes,OVB
 326363,large_airport,Platov International Airport,47.493888,39.924722,,EU,RU,RU-ROS,Rostov-on-Don,yes,ROV
 6519,large_airport,Sochi International Airport,43.449902,39.9566,,EU,RU,RU-KDA,Sochi,yes,AER
-317314,large_airport,atl,33.137551,-84.375,,NA,US,US-U-A,,yes,
-328024,large_airport,JFK,0,0,,NA,US,US-NY,New York,yes,
 26378,large_airport,Koltsovo Airport,56.74309921,60.80270004,,AS,RU,RU-SVE,Yekaterinburg,yes,SVX
 26392,large_airport,Tashkent International Airport,41.25790024,69.28119659,,AS,UZ,UZ-TO,Tashkent,yes,TAS
 42967,large_airport,Zhukovsky International Airport,55.553299,38.150002,,EU,RU,RU-MOS,Zhukovsky,yes,ZIA
@@ -521,13 +495,11 @@
 26396,large_airport,Sheremetyevo International Airport,55.972599,37.4146,,EU,RU,RU-MOS,Moscow,yes,SVO
 26401,large_airport,Vnukovo International Airport,55.59149933,37.26150131,,EU,RU,RU-MOS,Moscow,yes,VKO
 26404,large_airport,Kazan International Airport,55.60620117,49.27870178,,EU,RU,RU-TA,Kazan,yes,KZN
-34954,large_airport,Borisoglebskoye Airport,55.86669922,49.13330078,,EU,RU,RU-TA,Kazan,no,
 26411,large_airport,Ufa International Airport,54.55749893,55.87440109,,EU,RU,RU-BA,Ufa,yes,UFA
 26412,large_airport,Kurumoch International Airport,53.50490189,50.16429901,,EU,RU,RU-SAM,Samara,yes,KUF
 26434,large_airport,Chhatrapati Shivaji International Airport,19.08869934,72.86789703,,AS,IN,IN-MM,Mumbai,yes,BOM
 26444,large_airport,Dabolim Airport,15.38080025,73.83139801,,AS,IN,IN-GA,Vasco da Gama,yes,GOI
 26463,large_airport,Bandaranaike International Colombo Airport,7.180759907,79.88410187,,AS,LK,LK-1,Colombo,yes,CMB
-309579,large_airport,Mattala Rajapaksa International Airport,6.284467,81.124128,,AS,LK,LK-3,,yes,HRI
 26475,large_airport,Phnom Penh International Airport,11.54660034,104.8440018,,AS,KH,KH-8,Phnom Penh,yes,PNH
 26476,large_airport,Siem Reap International Airport,13.41069984,103.8130035,,AS,KH,KH-17,Siem Reap,yes,REP
 26496,large_airport,Netaji Subhash Chandra Bose International Airport,22.65469933,88.44670105,,AS,IN,IN-WB,Kolkata,yes,CCU
@@ -557,12 +529,10 @@
 32634,large_airport,Dominique Edward Osok Airport,-0.894,131.287,,AS,ID,ID-PB,Sorong-Papua Island,yes,SOQ
 26819,large_airport,Brunei International Airport,4.944200039,114.9280014,,AS,BN,BN-BM,Bandar Seri Begawan,yes,BWN
 26835,large_airport,Soekarno-Hatta International Airport,-6.12556982,106.6559982,,AS,ID,ID-BT,Jakarta,yes,CGK
-309577,large_airport,Kualanamu International Airport,3.642222,98.885278,,AS,ID,ID-SU,,no,KNO
 26874,large_airport,Kuala Lumpur International Airport,2.745579958,101.7099991,,AS,MY,MY-14,Kuala Lumpur,yes,KUL
 26887,large_airport,Singapore Changi Airport,1.35019,103.994003,,AS,SG,SG-04,Singapore,yes,SIN
 26901,large_airport,Brisbane International Airport,-27.38419914,153.1170044,,OC,AU,AU-QLD,Brisbane,yes,BNE
 27066,large_airport,Melbourne International Airport,-37.673302,144.843002,,OC,AU,AU-VIC,Melbourne,yes,MEL
-326290,large_airport,International Airport of Mirabel - Academy of Aeronautics of Canada Flying School training,0,0,,NA,CA,CA-QC,Mirabel,no,YMX
 27096,large_airport,Adelaide International Airport,-34.945,138.531006,,OC,AU,AU-SA,Adelaide,yes,ADL
 27119,large_airport,Perth International Airport,-31.94029999,115.9670029,,OC,AU,AU-WA,Perth,yes,PER
 27131,large_airport,Canberra International Airport,-35.30690002,149.1950073,,OC,AU,AU-ACT,Canberra,yes,CBR
