@@ -9,6 +9,10 @@ from sap import xssec
 from flask import *
 from flask_socketio import SocketIO
 from flask_socketio import send, emit, Namespace
+# my own imports
+from matplotlib import pyplot as plt
+from tempfile import TemporaryFile
+from datetime import date
 
 #create instance of flask app
 app = Flask(__name__)
@@ -102,6 +106,41 @@ def showMap():
         
         map_osm.save('./map.html')
         return send_file('./map.html')
+
+@app.route('/definitelyDoesntWork', methods=['GET'])
+def definitelyDoesntWork():
+        logger.info('hey subi')
+
+        agencies = request.args['agencies']
+        query = "SELECT date, SUM(TOTAL_PRICE) from SALES where AGENCYNUM IN (" + agencies = ") and date GT ADD_DAYS (CURRENT_DATE, -28)" # how does date comp work????!!!
+        # SQLI as well
+        result = executeQuery(conn, query, None, True)
+        xs = []
+        ys = [] # not very smart....
+        for i in result:
+             xs.append(i[0])
+             ys.append(i[1])
+       # plot shit
+		fig, ax = plt.subplots(1)
+		fig.autofmt_xdate()
+		ax.plot(xs,ys)
+		ax.set_xlabel("date")
+		ax.set_ylabel("moneyyyy")
+		plt.title("SUBIIIIIi")
+		#plt.show 
+
+		# save shit
+		f = TemporaryFile()
+		plt.savefig(f, format = "png")
+		f.seek(0)
+		content = f.read()
+		f.close()
+		
+		# trying to play nice with js frontend, might be unnecesary, might be useful, we'll see	
+        response = make_response(content)
+        response.headers.set('Content-Type', 'image/png')
+        response.headers.set('Content-Disposition', 'attachment', filename='graph.jpg')
+        return response
 
 ''' Using ArcGIS '''
 @app.route('/geocode', methods=['GET'])
