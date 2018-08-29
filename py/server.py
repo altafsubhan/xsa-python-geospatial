@@ -82,7 +82,6 @@ def getLatLong(addr):
     try:
         r = requests.get(url + '?address=%s&key=%s' % (addr, key))
         logger.info('ADDRESS: %s' % addr)
-        #logger.info(r.json())
         lat = r.json()['results'][0]['geometry']['location']['lat']
         lng = r.json()['results'][0]['geometry']['location']['lng']
         return lat, lng
@@ -118,13 +117,13 @@ def geocode():
         query = '''
                 SELECT "NAME", "STREET", "CITY", "COUNTRY", "POSTCODE"
                 FROM %s
-                ''' % tableName     #SQL INJECTION
+                ''' % tableName 
     elif (ptType == 'airports'):
         tableName = 'SAIRPORTS'
         query = '''
                 SELECT NAME, LONGITUDE, LATITUDE
                 FROM %s
-                ''' % tableName     #SQL INJECTION
+                ''' % tableName    
                     
     for result in executeQuery(conn, query):
         if (ptType == 'agencies'):
@@ -141,11 +140,12 @@ def geocode():
         query = '''
                 UPDATE %s
                 SET "LOC_4326" = ST_GeomFromText('POINT(%s %s)', 4326)
-                WHERE "NAME" = '%s';
-                ''' % (tableName, lng, lat, name.replace("'", "''")) 
+                WHERE "NAME" = ?;
+                ''' % (tableName, lng, lat)
                 ###### SQL INJECTION ALERT
 
-        executeQuery(conn, query, None, True)
+        param = name.replace("'", "''")
+        executeQuery(conn, query, param, True)
 
         #FOR TESTING
         results.append({
@@ -230,7 +230,7 @@ class SpeechWsNamespace(Namespace):
             )
             GROUP CLUSTER BY OBJ_LOCATION 
             USING KMEANS CLUSTERS %d;
-        ''' % (tableName, options['number'])    #SQL INJECTION ALERT
+        ''' % (tableName, options['number'])
 
         response = []
         for result in executeQuery(connectDB('spatial-db'), query):
@@ -247,11 +247,11 @@ class SpeechWsNamespace(Namespace):
         query = '''
             SELECT NAME, AGENCYNUM, LOC_4326.ST_X(), LOC_4326.ST_Y()
             FROM STRAVELAG
-            WHERE CONTAINS(NAME, '%s', FUZZY(0.7));
-        ''' % input.replace('\'', '\'\'')         #SQL INJECTION ALERT
-        #params = input
+            WHERE CONTAINS(NAME, ?, FUZZY(0.7));
+        '''
+        params = input.replace('\'', '\'\'')
         
-        result = executeQuery(connectDB('spatial-db'), query)
+        result = executeQuery(connectDB('spatial-db'), query, params)
         name = result[0][0]
         agency = result[0][1]
         lng = result[0][2]
@@ -264,7 +264,7 @@ class SpeechWsNamespace(Namespace):
             AND SALE_DATE > ADD_DAYS(CURRENT_DATE, -28)
             GROUP BY SALE_DATE
             ORDER BY SALE_DATE ASC
-        ''' % (agency)     #SQL INJECTION
+        ''' % (agency)
 
         result = executeQuery(connectDB('spatial-db'), salesQuery)
         x = [str(i[0]) for i in result]
@@ -300,7 +300,7 @@ class SpeechWsNamespace(Namespace):
             FROM STRAVELAG
             WHERE LOC_4326 IS NOT NULL
             ORDER BY WITHIN ASC
-        ''' % polygonString     #SQL INJECTION
+        ''' % polygonString
 
         agencyResponse = []
         agencies = []
@@ -322,7 +322,7 @@ class SpeechWsNamespace(Namespace):
             AND SALE_DATE > ADD_DAYS(CURRENT_DATE, -28)
             GROUP BY SALE_DATE
             ORDER BY SALE_DATE ASC
-        ''' % (str(agencies)[1:-1])     #SQL INJECTION
+        ''' % (str(agencies)[1:-1])
 
         result = executeQuery(connectDB('spatial-db'), salesQuery)
         x = [str(i[0]) for i in result]
