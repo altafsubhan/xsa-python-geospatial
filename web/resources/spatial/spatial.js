@@ -109,9 +109,8 @@ require([
 			view.graphics.remove(graphic);
 
 			var polygon = createPolygon(event.vertices);
-			graphic = createGraphic(polygon);
 
-			view.graphics.add(graphic);
+			view.graphics.add(createGraphic(polygon));
 		}
 	
 		//create polygon with given vertices
@@ -142,7 +141,9 @@ require([
 		//use polygon
 		function doneDrawingPolygon(event){
 			//focus on area
-			
+			var featureExtent = graphic.geometry.extent;
+			view.extent = featureExtent;
+
 			//get coordinates
 			vertices = event.vertices;
 			polygonCoord = [];
@@ -487,8 +488,7 @@ require([
 					Name: points[i].Name,
 					Address: points[i].Address
 				}
-				var graphic = new Graphic(pt, symbol, attr);
-				pointGraphics.push(graphic);		
+				pointGraphics.push(new Graphic(pt, symbol, attr));
 			}
 		}
 		return pointGraphics;
