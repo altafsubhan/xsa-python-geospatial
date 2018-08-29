@@ -77,7 +77,7 @@ require([
 
 	//draw polygon button for user polygon input
 	view.ui.add("draw-polygon", "top-left");
-	var pointGraphics = [];
+	//var pointGraphics = [];
 	view.when(function (event) {
 		var graphic;
 		var draw = new Draw({
@@ -158,6 +158,7 @@ require([
 
 				//show selected
 				var selectedHTML = document.getElementById('selected');
+				selectedHTML.style.height = 'auto';
 				var ul = document.createElement('ul');
 				for (var i = 0; i < response[0].length; i++) {
 					var li = document.createElement('li');
@@ -211,6 +212,7 @@ require([
 	function searchZoom(input) {
 		globalSocket.emit('travelAgencyNameSearch', input, response => {
 			if (response !== "error") name = response[0];
+			refreshPanel();
 			//show graph
 			var trace = {
 				x: response[1].x,
@@ -376,7 +378,8 @@ require([
 	});
 
 	//heatmap
-	var baseURL = "https://raw.githubusercontent.com/subhanaltaf/xsa-python-geospatial/master/db/src/data/loads/"
+	//var baseURL = "https://raw.githubusercontent.com/subhanaltaf/xsa-python-geospatial/master/db/src/data/loads/"
+	var baseURL = "https://py.hanapm.local.com:30033/getCSV?file=travel_agencies_latlng.csv"
 	var agencyHeatMapBtn = document.getElementById('showAgencyHeatMapBtn');
 	agencyHeatMapBtn.addEventListener("click", () => {
 		url = baseURL + "travel_agencies_latlng.csv";
@@ -451,6 +454,12 @@ require([
 					text: count,
 					verticalAlignment: "middle"
 				}
+				/*var pt = {
+					type: 'point',
+					longitude: points[i].Longitude,
+					latitude: points[i].Latitude,
+					spatialReference: {wkid: 4326}
+				}*/
 				var pt = new Point(points[i].Longitude, points[i].Latitude, 4326);
 				var attr = {
 					ClusterID: points[i].ClusterID
@@ -463,6 +472,12 @@ require([
 		} else {
 			for (var i = 0; i < points.length; i++) {
 				var pt = new Point(points[i].Longitude, points[i].Latitude, 4326);
+				/*var pt = {
+					type: 'point',
+					longitude: points[i].Longitude,
+					latitude: points[i].Latitude,
+					spatialReference: {wkid: 4326}
+				}*/
 				var attr = {
 					Name: points[i].Name,
 					Address: points[i].Address
@@ -480,5 +495,6 @@ require([
 		graphHTML.style.visibility = 'hidden';
 		var selectedHTML = document.getElementById('selected');
 		selectedHTML.style.visibility = 'hidden';
+		selectedHTML.style.height = '5%';
 	}
 });
