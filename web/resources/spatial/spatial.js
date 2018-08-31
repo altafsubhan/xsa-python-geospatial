@@ -9,7 +9,7 @@ require([
 	"esri/geometry/Point",
 	"esri/layers/GraphicsLayer",
 	"esri/renderers/HeatmapRenderer",
-    "esri/config",
+        "esri/config",
 	"esri/layers/CSVLayer"
 ], function (
 	Map,
@@ -42,6 +42,7 @@ require([
 		} //for side panel
 	});
 
+	//for detecting zoom - not used
 	view.on("double-click", (e) => {
 		console.log(view.zoom);
 	});
@@ -77,7 +78,6 @@ require([
 
 	//draw polygon button for user polygon input
 	view.ui.add("draw-polygon", "top-left");
-	//var pointGraphics = [];
 	view.when(function (event) {
 		var graphic;
 		var draw = new Draw({
@@ -89,10 +89,10 @@ require([
 		drawPolygonButton.addEventListener("click", function () {	
 			map.remove(clusterLayer);
 			map.remove(heatMapLayer);
-			showTravelAgentsBtn.click();
+			showTravelAgentsBtn.click();	//show agencies if not showing already
 			
-			view.graphics.remove(graphic);
-			enableCreatePolygon(draw, view);
+			view.graphics.remove(graphic);	//remove previous polygon if exists
+			enableCreatePolygon(draw, view);	//start event listeners 
 		});
 
 		//event handlers for creating polygon
@@ -141,12 +141,11 @@ require([
 
 		//use polygon
 		function doneDrawingPolygon(event){
-			//focus on area
-			
 			//get coordinates
 			vertices = event.vertices;
 			polygonCoord = [];
 			for (var i = 0; i < vertices.length; i++) {
+				//planar x,y -> SRID 4326 (lng, lat)
 				polygonCoord.push(webMercatorUtils.xyToLngLat(
 					vertices[i][0], vertices[i][1]
 				));
@@ -154,8 +153,6 @@ require([
 			//send to Python
 			polygonCoord.push(polygonCoord[0]);		//required for HANA
 			globalSocket.emit('polygonDrawn', polygonCoord, response => {
-				console.log(response);
-
 				//show selected
 				var selectedHTML = document.getElementById('selected');
 				selectedHTML.style.height = 'auto';
@@ -198,6 +195,7 @@ require([
 	var searchSubmitBtn = document.getElementById('searchSubmit');
 	var searchField = document.getElementById('searchField');
 	
+	//show results on 'Enter'
 	searchField.addEventListener("keyup", event => {
 		if (event.key !== "Enter") return;
 		searchSubmitBtn.click();
@@ -212,7 +210,7 @@ require([
 	function searchZoom(input) {
 		globalSocket.emit('travelAgencyNameSearch', input, response => {
 			if (response !== "error") name = response[0];
-			refreshPanel();
+			refreshPanel();	    //hide previous graphs
 			//show graph
 			var trace = {
 				x: response[1].x,
@@ -233,13 +231,14 @@ require([
 			var graphHTML = document.getElementById('graph');
 			graphHTML.style.visibility = 'visible';			
 			
+			//show nearest airport
 			var distanceHTML = document.getElementById('distance');
 			var distanceText = '<p><strong>Closest airport:</strong> ' 
 								  +  response[2].Name + ' at a distance of: ' 
 								  + response[2].Distance.toFixed(2) + ' km.</p>';
 			distanceHTML.innerHTML = distanceText;
 			distanceHTML.style.visibility = 'visible';
-			zoomIn(name);
+			zoomIn(name);	//zoom in on point
 		});
 	}
 
@@ -247,7 +246,7 @@ require([
 	view.on("click", function (event) {
 		event.stopPropagation();	//required
 		view.hitTest(event).then(function (response) {
-			if (response.results.length === 1) { // might cause problems later... we'll see
+			if (response.results.length === 1) { 
 				var g = response.results[0].graphic;
 				zoomIn(g);
 			}
@@ -257,9 +256,13 @@ require([
 	//actual zoom in function
 	function zoomIn(input) {
 		var pointGraphics = [];
+		
+		//finds all points being shown on map
 		for (var i = 0; i < map.layers.items.length; i++) {
 			pointGraphics = pointGraphics.concat(map.layers.items[i].graphics.items);
 		}
+		
+		//iterates through graphics until selected point found
 		for (var i = 0; i < pointGraphics.length; i++) {
 			if (pointGraphics[i].attributes.Name === input || 
 					input === pointGraphics[i]
@@ -273,9 +276,11 @@ require([
 					duration: 1500,
 					easing: 'linear'
 				}
+				//zooms into selected point
 				view.goTo(target, options).then(() => {
 					var title = target.target.attributes.Name;
 					var addr = target.target.attributes.Address;
+					//creates popup with information about point
 					view.popup.open({
 						title: title,
 						location: {
@@ -296,20 +301,25 @@ require([
 	function showTravelAgents() {
 		globalSocket.emit('getPts', "travelAgents", pts => {
 			if (pts !== "error") {
+				//marker for points
 				var ptSymbol = {
 					type: "picture-marker",
 					url: "images/marker.png",
 					width: 20,
 					height: 20
 				}
+				//get list of points (as graphics)
 				agencyPoints = makePointsList(pts, ptSymbol)
+				
+				//add points to GraphicsLayer
 				var agencyPtsLayer = new GraphicsLayer({
 					graphics: agencyPoints
 				});
+				
 				refreshPanel();
 				map.remove(clusterLayer);
 				map.remove(heatMapLayer);
-				map.add(agencyPtsLayer);
+				map.add(agencyPtsLayer);	//show points
 			}
 		});
 	}
@@ -320,20 +330,26 @@ require([
 	function showAirports() {
 		globalSocket.emit('getPts', 'airports', pts => {
 			if (pts !== "error") {
+				//marker
 				var ptSymbol = {
 					type: "picture-marker",
 					url: "images/airport_marker.png",
 					width: 20,
 					height: 20
 				}
+				
+				//get graphics
 				airportPoints = makePointsList(pts, ptSymbol)
+				
+				//make GraphicsLayer
 				var airportPtsLayer = new GraphicsLayer({
 					graphics: airportPoints
 				});
+				
 				refreshPanel();
 				map.remove(clusterLayer);
 				map.remove(heatMapLayer);
-				map.add(airportPtsLayer);
+				map.add(airportPtsLayer);	//show graphics
 			}
 		});
 	}
@@ -347,6 +363,7 @@ require([
 		}
 		globalSocket.emit('getClusters', options, pts => {
 			if (pts !== "error") {
+				//get points, prepare graphics layer, show layer
 				clusterPoints = makePointsList(pts, null, true)
 				clusterLayer = new GraphicsLayer({
 					graphics: clusterPoints
@@ -381,9 +398,10 @@ require([
 	var baseURL = "https://raw.githubusercontent.com/subhanaltaf/xsa-python-geospatial/master/db/src/data/loads/"
 	var agencyHeatMapBtn = document.getElementById('showAgencyHeatMapBtn');
 	agencyHeatMapBtn.addEventListener("click", () => {
-		url = baseURL + "travel_agencies_latlng.csv";
-		esriConfig.request.corsEnabledServers.push(url);
+		url = baseURL + "travel_agencies_latlng.csv";	//csv file containing data
+		esriConfig.request.corsEnabledServers.push(url);	//prevent cors issue
 
+		//init heatmap renderer
 		const renderer = {
         	type: "heatmap",
         	colorStops: [
@@ -394,6 +412,7 @@ require([
 			minPixelIntensity: 0
     	};
 
+		//create csv layer incl renderer + points from csv file
 	  	heatMapLayer = new CSVLayer({
         	url: url,
         	title: "Travel Agencies",
@@ -404,7 +423,7 @@ require([
 
 		refreshPanel();  
 	  	map.removeAll();
-		map.add(heatMapLayer);
+		map.add(heatMapLayer);	//show heat map
 	});
 
 	var airportHeatMapBtn = document.getElementById('showAirportHeatMapBtn');
@@ -437,10 +456,14 @@ require([
 	//prepare list of points to show on map
 	function makePointsList(points, symbol, cluster=false) {
 		var pointGraphics = []
+		//for clusters
 		if (cluster) {
 			for (var i = 0; i < points.length; i++) {
 				var count = points[i].Count;
+				//red marker for 5+ count, yellow for others
 				var source = count > 5 ? "images/cluster_marker_red.png" : "images/cluster_marker_yellow.png";
+				
+				//text + picture marker needed
 				var ptSymbol = {
 					type: "picture-marker",
 					url: source,
@@ -453,12 +476,8 @@ require([
 					text: count,
 					verticalAlignment: "middle"
 				}
-				/*var pt = {
-					type: 'point',
-					longitude: points[i].Longitude,
-					latitude: points[i].Latitude,
-					spatialReference: {wkid: 4326}
-				}*/
+				
+				//create point to show on map + add to list
 				var pt = new Point(points[i].Longitude, points[i].Latitude, 4326);
 				var attr = {
 					ClusterID: points[i].ClusterID
@@ -470,13 +489,8 @@ require([
 			}
 		} else {
 			for (var i = 0; i < points.length; i++) {
+				//create point graphics and add to list
 				var pt = new Point(points[i].Longitude, points[i].Latitude, 4326);
-				/*var pt = {
-					type: 'point',
-					longitude: points[i].Longitude,
-					latitude: points[i].Latitude,
-					spatialReference: {wkid: 4326}
-				}*/
 				var attr = {
 					Name: points[i].Name,
 					Address: points[i].Address
@@ -485,8 +499,10 @@ require([
 				pointGraphics.push(graphic);		
 			}
 		}
-		return pointGraphics;
+		return pointGraphics;	//return list of graphics
 	}
+	
+	//refresh panel containing graphs and other data
 	function refreshPanel(){
 		var distanceHTML = document.getElementById('distance');
 		distanceHTML.style.visibility = 'hidden';
