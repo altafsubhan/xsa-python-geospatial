@@ -34,6 +34,7 @@ def connectDB(serviceName):
                          CURRENTSCHEMA=service.credentials['schema'])
     return conn
 
+#used for executing SQL queries - returns list of ResultRows
 def executeQuery(conn, query, params=None, commit=False):
     logger.info(query + ' % ' + str(params))
 
@@ -75,7 +76,7 @@ def hello():
     
     return "Welcome to SAP HANA Spatial Demo with Python and XSA!"
 
-#### USING FOLIUM ####
+''' USING FOLIUM '''
 def getLatLong(addr):
     key = 'AIzaSyAp7Ad6nKFet8XBxYYh4TWFVAa3cpSMmR0'
     url = 'https://maps.googleapis.com/maps/api/geocode/json'
@@ -103,6 +104,8 @@ def showMap():
         return send_file('./map.html')
 
 ''' Using ArcGIS '''
+
+#geocde airport/agency locations - not part of demo
 @app.route('/geocode', methods=['GET'])
 def geocode():
     #authorize user
@@ -169,8 +172,10 @@ class SpeechWsNamespace(Namespace):
         logger.info('Error in websocket connection: %s' % e)
         self.close()
 
+    #to get location of agencies or aiports
     def on_getPts(self, type):
         if (type == "travelAgents"):
+            #prepare SQL query
             conn = connectDB('spatial-db')
             query = '''
                 SELECT 
@@ -180,6 +185,7 @@ class SpeechWsNamespace(Namespace):
                 FROM STRAVELAG
             '''
 
+            #prepare and send response
             response = []
             for result in executeQuery(conn, query):
                 response.append({
@@ -188,15 +194,18 @@ class SpeechWsNamespace(Namespace):
                     'Longitude': result[4],
                     'Latitude': result[5]
                 })
+                
             logger.info('sending: ' + str(response))
             return(response)
         elif (type == "airports"):
+            #prepare query
             query = '''
                     SELECT 
                     NAME, MUNICIPALITY, ISO_COUNTRY, LONGITUDE, LATITUDE
                     FROM SAIRPORTS
                     '''
             
+            #prepare and send response
             response = []
             for result in executeQuery(connectDB('spatial-db'), query):
                 response.append({
@@ -205,11 +214,13 @@ class SpeechWsNamespace(Namespace):
                     'Longitude': result[3],
                     'Latitude': result[4]
                 })
+                
             logger.info('sending: ' + str(response))
             return(response)
         else:
             return("error")
 
+    #to get centroid location + count of clusters
     def on_getClusters(self, options):
         if (options['type'] == 'travelAgents'):
             tableName = 'STRAVELAG'
@@ -218,6 +229,7 @@ class SpeechWsNamespace(Namespace):
         else:
             return "error"
            
+        #query for spatial clustering using K-Means
         query = '''
             SELECT ST_ClusterID() AS CID, 
             COUNT(*) AS COUNT,
@@ -232,6 +244,7 @@ class SpeechWsNamespace(Namespace):
             USING KMEANS CLUSTERS %d;
         ''' % (tableName, options['number'])
 
+        #prepare and send response
         response = []
         for result in executeQuery(connectDB('spatial-db'), query):
             response.append({
@@ -240,23 +253,28 @@ class SpeechWsNamespace(Namespace):
                 'Longitude': result[2],
                 'Latitude': result[3]
             })
+            
         logger.info('sending: ' + str(response))
         return(response)
 
+    #to get best match for searched agency - uses fuzzy search
     def on_travelAgencyNameSearch(self, input):
+        #SQL query for fuzzy search - returns info about agency
         query = '''
             SELECT NAME, AGENCYNUM, LOC_4326.ST_X(), LOC_4326.ST_Y()
             FROM STRAVELAG
             WHERE CONTAINS(NAME, ?, FUZZY(0.7));
         '''
         params = input.replace('\'', '\'\'')
-        
         result = executeQuery(connectDB('spatial-db'), query, params)
+        
+        #used for further processing
         name = result[0][0]
         agency = result[0][1]
         lng = result[0][2]
         lat = result[0][3]
 
+        #query for getting sales data
         salesQuery = '''
             SELECT SALE_DATE, SUM(TOTAL_PRICE) 
             FROM STRANSACTIONS 
@@ -266,11 +284,13 @@ class SpeechWsNamespace(Namespace):
             ORDER BY SALE_DATE ASC
         ''' % (agency)
 
+        #execute query + prepare response
         result = executeQuery(connectDB('spatial-db'), salesQuery)
         x = [str(i[0]) for i in result]
         y = [i[1] for i in result]
         salesResponse = {'x': x, 'y': y}
 
+        #query for getting nearest airport
         airportQuery = '''
             SELECT TOP 1 LOC_4326.ST_Distance(
                 ST_GeomFromText('POINT(%s %s)', 4326), 'kilometer')
@@ -278,20 +298,26 @@ class SpeechWsNamespace(Namespace):
             FROM SAIRPORTS ORDER BY Distance ASC;	
          ''' % (lng, lat)
 
+        #execute + prepare response
         result = executeQuery(connectDB('spatial-db'), airportQuery)[0]
         distanceResponse = {
             'Name': result[1],
             'Distance': result[0]
         }
 
+        #send agency info, sales record, nearest airport
         response = [name, salesResponse, distanceResponse]
         return response
 
+    #when user has drawn a polygon on map
     def on_polygonDrawn(self, polygonCoord):
+        #list of polygon coordinates (vertices) -> WKT representation
         polygonString = 'POLYGON(('
         for coord in polygonCoord:
             polygonString += str(coord[0]) + ' ' + str(coord[1]) + ', '
         polygonString = polygonString[:-2] + '))'
+        
+        #query for getting points within drawn polygon
         withinQuery = '''
             SELECT LOC_4326.ST_Transform(1000004326).ST_Within(
                 ST_GeomFromText('%s', 4326).ST_Transform(1000004326))
@@ -302,6 +328,7 @@ class SpeechWsNamespace(Namespace):
             ORDER BY WITHIN ASC
         ''' % polygonString
 
+        #save results to return + for further processing
         agencyResponse = []
         agencies = []
         for result in executeQuery(connectDB('spatial-db'), withinQuery):
@@ -312,9 +339,8 @@ class SpeechWsNamespace(Namespace):
                     "Longitude": result[3]
                 })
                 agencies.append(result[4])
-        logger.info(agencyResponse)
-        logger.info(agencies)
 
+        #query for getting aggregate sales data for all agencies
         salesQuery = '''
             SELECT SALE_DATE, SUM(TOTAL_PRICE) 
             FROM STRANSACTIONS 
@@ -324,17 +350,17 @@ class SpeechWsNamespace(Namespace):
             ORDER BY SALE_DATE ASC
         ''' % (str(agencies)[1:-1])
 
+        #execute query + prepare response
         result = executeQuery(connectDB('spatial-db'), salesQuery)
         x = [str(i[0]) for i in result]
         y = [i[1] for i in result]
         salesResponse = {'x': x, 'y': y}
-        logger.info(salesResponse)
 
+        #send back selected agency names + aggregate sales data
         response = [agencyResponse, salesResponse]
-
         return response
         
-socketio.on_namespace(SpeechWsNamespace('/geospatial'))
+socketio.on_namespace(SpeechWsNamespace('/geospatial'))    #initialize geospatial endpoint
 
 ''' START APP '''
 if __name__ == '__main__':
