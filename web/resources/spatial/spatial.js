@@ -396,8 +396,7 @@ require([
 	});
 
 	//heatmap
-	//var baseURL = "https://raw.githubusercontent.com/subhanaltaf/xsa-python-geospatial/master/db/src/data/loads/"
-	var baseURL = "./"	//relative links work!
+	var baseURL = "https://raw.githubusercontent.com/subhanaltaf/xsa-python-geospatial/master/db/src/data/loads/"
 	var agencyHeatMapBtn = document.getElementById('showAgencyHeatMapBtn');
 	agencyHeatMapBtn.addEventListener("click", () => {
 		url = baseURL + "travel_agencies_latlng.csv";	//csv file containing data
