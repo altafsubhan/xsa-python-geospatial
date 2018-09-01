@@ -54,6 +54,7 @@ require([
 	var globalSocket;
 	var websocketPromise = new Promise((resolve, reject) => {
 		var socket = io.connect('wss://py.hanapm.local.com:30033/geospatial');
+		//var socket = io.connect('/py/geospatial')	//for better scaling
 		socket.on('open', resolve(socket));
 		socket.on('error', reject());
 	});
@@ -395,7 +396,8 @@ require([
 	});
 
 	//heatmap
-	var baseURL = "https://raw.githubusercontent.com/subhanaltaf/xsa-python-geospatial/master/db/src/data/loads/"
+	//var baseURL = "https://raw.githubusercontent.com/subhanaltaf/xsa-python-geospatial/master/db/src/data/loads/"
+	var baseURL = "./"	//relative links work!
 	var agencyHeatMapBtn = document.getElementById('showAgencyHeatMapBtn');
 	agencyHeatMapBtn.addEventListener("click", () => {
 		url = baseURL + "travel_agencies_latlng.csv";	//csv file containing data
